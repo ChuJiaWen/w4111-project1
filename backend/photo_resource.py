@@ -1,7 +1,6 @@
-import flask_login
-from flask import Flask, request, render_template, g, redirect, Response, url_for
+from flask import render_template, g
 
-import album_resource,user_resource,tag_resource
+import album_resource, tag_resource
 from datetime import datetime
 
 def getPhoto(pid):

@@ -1,9 +1,8 @@
 import base64
 
-import flask_login
-from flask import Flask, request, render_template, g, redirect, Response, url_for
+from flask import request, render_template, g
 import user_resource, photo_resource
-from datetime import datetime
+
 
 def getAlbumName(aid):
     result = g.conn.execute("SELECT name FROM Albums WHERE aid ='{0}'".format(aid)).fetchone()

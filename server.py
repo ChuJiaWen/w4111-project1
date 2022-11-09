@@ -10,14 +10,11 @@ Read about it online.
 """
 import os
   # accessible as a variable in index.html:
-import flask
 from sqlalchemy import *
-from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, url_for
+from flask import Flask, request, render_template, g
 import flask_login
 
-import album_resource,user_resource,photo_resource
-
+from backend import user_resource, photo_resource, album_resource
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -237,7 +234,7 @@ def create_album():
 
     #The method is GET so we return a  HTML form to upload the a photo.
     else:
-        return render_template('album.html',album=user_resource.getUsersAlbums(uid))
+        return render_template('album.html', album=user_resource.getUsersAlbums(uid))
 
 @app.route("/onealbum", methods=['GET','POST'])
 @flask_login.login_required
