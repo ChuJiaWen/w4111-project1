@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<head>
+    <title>You May Like</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;}
+        a{
+            font-size: calc(5px + 0.8vw);
+            color: #b75036;
+        }
+        a:hover {
+            color: #deb344;
+            text-decoration: none;
+        }
+        nav li{
+            margin: 0.5vh 1.5em;
+            padding: 0.5vh 0;
+            box-sizing: border-box;
+            width: 80%;
+            font-size: 15px;
+            display: inline;
+            text-align: center;
+        }
+        nav ul {
+            padding-inline-start: 0;
+            margin-block-start: 0;
+            margin:auto;
+            margin: 3vh 1vw;
+            text-align:center;
+		    box-sizing:border-box;
+            border-bottom: solid gray(1) 5px;
+        }
+        nav a {
+            color: #5aa7e8;
+            font-size: calc(4px + 1vw);
+        }
+        nav a:hover {
+            color: #81e0e0;
+            text-decoration: none;
+        }
+        nav{
+            border-bottom: solid gray(1) 5px;
+
+        }
+        .photos{
+            border: double 8px darkred;
+            padding: 2vh 3vw;
+        }
+        h3.caption , h3.tag{border-bottom: dashed dimgrey 2px;
+            margin: 0;
+        }
+        h3.caption{
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<nav>
+    <ul>
+        <li><a href='/friend'>Add a new friend</a> </li>
+        <li><a href='/album'>Go to Albums</a></li>
+        <li><a href='/search'>Go to search</a></li>
+        <li><a href='/browse'>Browse photos</a></li>
+        <li><a href='/youmaylike'>Photos you may also like</a></li>
+        <li><a href='/logout'>Logout</a></li>
+        <li><a href='/'>Home</a></li>
+    </ul>
+</nav>
+<hr>
+<h1>Here are photos you may like</h1>
+
+{% if photos ==[] %}
+    <h2 style="color: red">There is no photo recommanded for you. Please upload more photos with tags!</h2>
+{% endif %}
+
+<ul>
+{% for photo in photos %}
+    <div class="photos">
+    <li><h3 class="caption">Caption: {{photo[0][2]}}</h3></li>
+    <li><h3 class="tag" style="display: inline;">Tags:
+                {% for tag in photo[3] %}
+                    <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
+                {% endfor %}
+    </h3></li>
+        <br>
+            <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}' style="max-width: 100%; height: auto;"/>
+            <h4>Uploaded by: {{ photo[4] }}</h4>
+            <form method="post" enctype="multipart/form-data" action="/like">
+                <input type="hidden" name="distinction" value=2>
+                <input type="hidden" name="description" value={{ description }}>
+                <input type="hidden" name="aid" value={{ photo[5] }}>
+                <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                <input type="submit" value="Like ({{ photo[1] }})" size="10" />
+            </form>
+                <form method="post" enctype="multipart/form-data" action="/mytag?description={{ description }}">
+                    <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                    <input type="submit" value="Delete" />
+                </form>
+            <h3>Comments:</h3>
+            <table border="2" cellpadding="5" width="100%">
+                        <tr>
+                            <td><b> Commenter </b></td>
+                            <td><b> Comment </b></td>
+                            <td><b> Date </b></td>
+                        </tr>
+
+            {% for comment in photo[2] %}
+                        <tr>
+                            <td>{{ comment[5] }}</td>
+                            <td>{{ comment[0] }}</td>
+                            <td>{{ comment[1] }}</td>
+                        </tr>
+            {% endfor %}
+            </table>
+            <br>
+        {% if uid !=  photo[0][3]  %}
+            <form method="post" enctype="multipart/form-data" action="/youmaylike">
+                <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                <label for="comment">Leave your comment:</label>
+                <input type="text" name="comment" size="100" />
+                <input type="submit" value="Send" />
+            </form>
+        {% endif %}
+        </div>
+    <br>
+{% endfor %}
+</ul>
+<hr>
+<p style="text-align: center"><a href="#top">Back to top</a></p>
+</body>
+</html>

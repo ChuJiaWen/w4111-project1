@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add a friend</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;}
+        a{
+            font-size: calc(5px + 0.8vw);
+            color: #b75036;
+        }
+        a:hover {
+            color: #deb344;
+            text-decoration: none;
+        }
+        nav li{
+            margin: 0.5vh 1.5em;
+            padding: 0.5vh 0;
+            box-sizing: border-box;
+            width: 80%;
+            font-size: 15px;
+            display: inline;
+            text-align: center;
+        }
+        nav ul {
+            padding-inline-start: 0;
+            margin-block-start: 0;
+            margin:auto;
+            margin: 3vh 1vw;
+            text-align:center;
+		    box-sizing:border-box;
+            border-bottom: solid gray(1) 5px;
+        }
+        nav a {
+            color: #5aa7e8;
+            font-size: calc(4px + 1vw);
+        }
+        nav a:hover {
+            color: #81e0e0;
+            text-decoration: none;
+        }
+        nav{
+            border-bottom: solid gray(1) 5px;
+
+        }
+        .photos{
+            border: double 8px darkred;
+            padding: 2vh 3vw;
+        }
+        h3.caption , h3.tag{border-bottom: dashed dimgrey 2px;
+            margin: 0;
+        }
+        h3.caption{
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<nav>
+    <ul>
+        <li><a href='/friend'>Add a new friend</a> </li>
+        <li><a href='/album'>Go to Albums</a></li>
+        <li><a href='/search'>Go to search</a></li>
+        <li><a href='/browse'>Browse photos</a></li>
+        <li><a href='/youmaylike'>Photos you may also like</a></li>
+        <li><a href='/logout'>Logout</a></li>
+        <li><a href='/'>Home</a></li>
+    </ul>
+</nav>
+<hr>
+    <form method="post" action="/search">
+        <label for="content">Search content:</label>
+        <input type="text" name="content" required="true"  size="50"/><br />
+        <label for="distinction">Search option:</label>
+        <input type="radio" id="tag search" name="distinction" value='0' checked="checked">
+        <label for="tag search">Tag Search<sub>(Use spaces to separate multiple tags)</sub></label>
+        <input type="radio" id="comment search" name="distinction" value='1' >
+        <label for="comment search">Comment Search<sub>(Exactly match)</sub></label><br>
+        <input type="submit" value="Search"/>
+    </form>
+<hr>
+{% if photos %}
+    <h3 class="tag" style="display: inline;">Here are photos that associate with all tags:
+                {% for tag in content %}
+                    <a href="/onetag?description={{ tag }}"> #{{ tag }} </a>
+                {% endfor %}
+    </h3>
+<ul>
+{% for photo in photos %}
+    <div class="photos">
+    <li><h3 class="caption">Caption: {{photo[0][2]}}</h3></li>
+    <li><h3 class="tag" style="display: inline;border-bottom: dashed dimgrey 2px;">Tags:
+                {% for tag in photo[3] %}
+                    <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
+                {% endfor %}
+    </h3></li>
+        <br>
+            <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}' style="max-width: 100%; height: auto;"/>
+            <h4>Uploaded by: {{ photo[4] }}</h4>
+            <form method="post" enctype="multipart/form-data" action="/like">
+                <input type="hidden" name="description" value={{ description }}>
+                <input type="hidden" name="aid" value={{ photo[5] }}>
+                <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                <input type="submit" value="Like ({{ photo[1] }})" size="10" />
+            </form>
+            <h3>Comments:</h3>
+            <table border="2" cellpadding="5" width="100%">
+                        <tr>
+                            <td><b> Commenter </b></td>
+                            <td><b> Comment </b></td>
+                            <td><b> Date </b></td>
+                        </tr>
+
+            {% for comment in photo[2] %}
+                        <tr>
+                            <td>{{ comment[5] }}</td>
+                            <td>{{ comment[0] }}</td>
+                            <td>{{ comment[1] }}</td>
+                        </tr>
+            {% endfor %}
+            </table>
+            <br>
+        </div>
+    <br>
+{% endfor %}
+</ul>
+<hr>
+        {% else %}
+            {% if distinction == '0' %}
+                <p style="color: red">No one used this tag before</p>
+            {% endif %}
+    {% endif %}
+    {% if commenters %}
+        <h2>Users who made this comment:</h2>
+        <table border="2" cellpadding="5" width="60%">
+            <tr>
+                <th style="white-space:nowrap"><b> First name </b></th>
+                <th style="white-space:nowrap"><b> Count </b></th>
+            </tr>
+
+             {% for commenter in commenters %}
+                <tr>
+                        <td style="text-align: center;">{{ commenter[0] }}</td>
+                        <td style="text-align: center;">{{ commenter[1] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        {% if distinction == '1' %}
+            <p style="color: red">No user made this comment before</p>
+        {% endif %}
+    {% endif %}
+
+<hr>
+<p style="text-align: center"><a href="#top">Back to top</a></p>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add a friend</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;}
+        a{
+            font-size: calc(5px + 0.8vw);
+            color: #b75036;
+        }
+        a:hover {
+            color: #deb344;
+            text-decoration: none;
+        }
+        nav li{
+            margin: 0.5vh 1.5em;
+            padding: 0.5vh 0;
+            box-sizing: border-box;
+            width: 80%;
+            font-size: 15px;
+            display: inline;
+            text-align: center;
+        }
+        nav ul {
+            padding-inline-start: 0;
+            margin-block-start: 0;
+            margin:auto;
+            margin: 3vh 1vw;
+            text-align:center;
+		    box-sizing:border-box;
+            border-bottom: solid gray(1) 5px;
+        }
+        nav a {
+            color: #5aa7e8;
+            font-size: calc(4px + 1vw);
+        }
+        nav a:hover {
+            color: #81e0e0;
+            text-decoration: none;
+        }
+        nav{
+            border-bottom: solid gray(1) 5px;
+
+        }
+        .photos{
+            border: double 8px darkred;
+            padding: 2vh 3vw;
+        }
+        h3.caption , h3.tag{border-bottom: dashed dimgrey 2px;
+            margin: 0;
+        }
+        h3.caption{
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<nav>
+    <ul>
+        <li><a href='/friend'>Add a new friend</a> </li>
+        <li><a href='/album'>Go to Albums</a></li>
+        <li><a href='/search'>Go to search</a></li>
+        <li><a href='/browse'>Browse photos</a></li>
+        <li><a href='/youmaylike'>Photos you may also like</a></li>
+        <li><a href='/logout'>Logout</a></li>
+        <li><a href='/'>Home</a></li>
+    </ul>
+</nav>
+<hr>
+<div class="friendlist">
+{% if friendlist %}
+    <h1> Here is your friend list:</h1>
+        <ol>
+            <table border="5" cellpadding="5" width="80%" style="margin-left: 0px">
+                <tr>
+                    <th style="white-space:nowrap"><b> No. </b></th>
+                    <th style="white-space:nowrap"><b> First name </b></th>
+                    <th style="white-space:nowrap"><b> Last name </b></th>
+                    <th style="white-space:nowrap"><b> Email </b></th>
+                    <th style="white-space:nowrap"><b> Date of birth </b></th>
+                    <th style="white-space:nowrap"><b> Hometown </b></th>
+                    <th style="white-space:nowrap"><b> Gender </b></th>
+                </tr>
+            {% for friend in friendlist  %}
+            <tr>
+                <td> <li style="margin-left: 40px"></li></td>
+                <td style="text-align: center;">{{ friend[0] }}</td>
+                <td style="text-align: center;">{{ friend[1] }}</td>
+                <td style="text-align: center;">{{ friend[2] }}</td>
+                <td style="text-align: center;">{{ friend[3] }}</td>
+                <td style="text-align: center;">{{ friend[4] }}</td>
+                <td style="text-align: center;">{{ friend[5] }}</td>
+            </tr>
+            {% endfor %}
+            </table>
+        </ol>
+{% else %}
+        <h2 style="color: red; text-align: center;">You don't have any friend yet!</h2>
+{% endif %}
+ </div>
+<hr>
+<div class="searchfriend">
+    <h1>Search a friend</h1>
+    <h4>You don't have to enter every row.</h4>
+    <form method="post" enctype="multipart/form-data" action="/friend">
+        <label for="first_name">First name:</label>
+        <input type="text" name="first_name" /><br />
+
+        <label for="last_name">Last name:</label>
+        <input type="text" name="last_name"/><br />
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" /><br />
+
+        <label for="hometown">Hometown</label>
+        <input type="text" name="hometown"  /><br />
+
+        <input type="submit" value="Search" />
+    </form>
+</div>
+<div class="searchlist">
+{% if searchlist == None %}
+    <p style="color: red">Do not have a user that match your description. Please try some other values.</p>
+{% elif searchlist %}
+    <h1>Here are some matches:</h1>
+    <table border="2" cellpadding="5" width="80%" style="margin-left: 0px">
+                <tr>
+                    <th style="white-space:nowrap"><b> First name </b></th>
+                    <th style="white-space:nowrap"><b> Last name </b></th>
+                    <th style="white-space:nowrap"><b> Email </b></th>
+                    <th style="white-space:nowrap"><b> Date of birth </b></th>
+                    <th style="white-space:nowrap"><b> Hometown </b></th>
+                    <th style="white-space:nowrap"><b> Gender </b></th>
+                    <th style="width:10%"></th>
+                </tr>
+    {% for friend in searchlist %}
+            <tr>
+                <td style="text-align: center;">{{ friend[0] }}</td>
+                <td style="text-align: center;">{{ friend[1] }}</td>
+                <td style="text-align: center;">{{ friend[2] }}</td>
+                <td style="text-align: center;">{{ friend[3] }}</td>
+                <td style="text-align: center;">{{ friend[4] }}</td>
+                <td style="text-align: center;">{{ friend[5] }}</td>
+                <td style="text-align: center;"> <a href="/addfriend?femail={{ friend[2] }}">Add</a></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+<hr>
+{% if recommand %}
+<h1>Here are some recommended users for you:</h1>
+    <table border="2" cellpadding="5" width="80%" style="margin-left: 0px">
+                <tr>
+                    <th style="white-space:nowrap"><b> First name </b></th>
+                    <th style="white-space:nowrap"><b> Last name </b></th>
+                    <th style="white-space:nowrap"><b> Email </b></th>
+                    <th style="white-space:nowrap"><b> Date of birth </b></th>
+                    <th style="white-space:nowrap"><b> Hometown </b></th>
+                    <th style="white-space:nowrap"><b> Gender </b></th>
+                    <th style="white-space:nowrap"><b> Number of Common Friend </b></th>
+                    <th style="width:10%"></th>
+                </tr>
+    {% for friend in recommand %}
+            <tr>
+                <td style="text-align: center;">{{ friend[0][0] }}</td>
+                <td style="text-align: center;">{{ friend[0][1] }}</td>
+                <td style="text-align: center;">{{ friend[0][2] }}</td>
+                <td style="text-align: center;">{{ friend[0][3] }}</td>
+                <td style="text-align: center;">{{ friend[0][4] }}</td>
+                <td style="text-align: center;">{{ friend[0][5] }}</td>
+                <td style="text-align: center;">{{ friend[1] }}</td>
+                <td style="text-align: center;"> <a href="/addfriend?femail={{ friend[0][2]}}">Add</a></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <h2>There aren't any recommended users for you.</h2>
+{% endif %}
+</div>
+
+
+<hr>
+<p style="text-align: center"><a href="#top">Back to top</a></p>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Albums</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;}
+        nav li{
+            margin: 0.5vh 1em;
+            padding: 0.5vh 0;
+            box-sizing: border-box;
+            width: 80%;
+            font-size: 15px;
+            display: inline;
+            text-align: center;
+        }
+        nav ul {
+            padding-inline-start: 0;
+            margin-block-start: 0;
+            margin:auto;
+            margin: 3vh 1vw;
+            text-align:center;
+		    box-sizing:border-box;
+            border-bottom: solid gray(1) 5px;
+        }
+        a {
+            color: #5aa7e8;
+            font-size: calc(5px + 1vw);
+        }
+        a:hover {
+            color: #81e0e0;
+            text-decoration: none;
+        }
+        ul{
+            border-bottom: solid gray(1) 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href='/friend'>Add a new friend</a> </li>
+            <li><a href='/search'>Go to search</a></li>
+            <li><a href='/browse'>Browse photos</a></li>
+            <li><a href='/youmaylike'>Photos you may also like</a></li>
+            <li><a href='/logout'>Logout</a></li>
+            <li><a href='/'>Home</a></li>
+        </ul>
+    </nav>
+    <hr>
+    {% if message %}
+        <h4 style="color: red">{{message}}</h4>
+    {% endif %}
+    {% if album %}
+    <h1>Here are your albums:</h1>
+        <ul>
+            {% for al in album %}
+                <li style="margin: 1em 0;">{{al[1]}} <button onclick='window.location.assign("/onealbum?aid={{ al[0] }}")' style="display: inline;">Go into</button>
+                <form method="post" enctype="multipart/form-data" action="/album" style="display: inline;">
+                    <input type="hidden" name="distinction" value='1'>
+                    <input type="hidden" name="aid" value={{ al[0] }}>
+                    <input type="submit" value="Delete"  />
+                </form>
+                    <form method="post" enctype="multipart/form-data" action="/album" style="display: inline;">
+                        <input type="hidden" name="distinction" value='2'>
+                        <input type="hidden" name="aid" value={{ al[0] }}>
+                        <label for="newname" >Rename this album:</label>
+                        <input type="text" name="newname" required="true" size="12">
+                        <input type="submit" value="Rename" />
+                    </form>
+
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+<hr>
+<h1> Create an album!</h1>
+    <form method="post" enctype="multipart/form-data" action="/album">
+        <input type="hidden" name="distinction" value='0'>
+        <label for="name">Album name*:</label>
+        <input type="text" name="name" required='true' /><br />
+        <input type="submit" value="Create" />
+    </form>
+<hr>
+
+</body>
+</html>

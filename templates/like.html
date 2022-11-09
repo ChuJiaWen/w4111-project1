@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Like | Photo</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+<style>
+        *{box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;}
+        a{
+            font-size: calc(5px + 0.8vw);
+            color: #b75036;
+        }
+        a:hover {
+            color: #deb344;
+            text-decoration: none;
+        }
+        nav li{
+            margin: 0.5vh 1.5em;
+            padding: 0.5vh 0;
+            box-sizing: border-box;
+            width: 80%;
+            font-size: 15px;
+            display: inline;
+            text-align: center;
+        }
+        nav ul {
+            padding-inline-start: 0;
+            margin-block-start: 0;
+            margin:auto;
+            margin: 1vh 1vw;
+            text-align:center;
+		    box-sizing:border-box;
+            border-bottom: solid gray(1) 5px;
+        }
+        nav a {
+            color: #5aa7e8;
+            font-size: calc(5px + 1vw);
+        }
+        nav a:hover {
+            color: #81e0e0;
+            text-decoration: none;
+        }
+        nav{
+            border-bottom: solid gray(1) 5px;
+
+        }
+        .photos{
+            border: double 8px darkred;
+            padding: 2vh 3vw;
+        }
+        h3.caption , h3.tag{border-bottom: dashed dimgrey 2px;
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+<nav>
+        <ul>
+            <li><a href='/friend'>Add a new friend</a> </li>
+            <li><a href='/search'>Go to search</a></li>
+            <li><a href='/browse'>Browse photos</a></li>
+            <li><a href='/youmaylike'>Photos you may also like</a></li>
+            <li><a href='/logout'>Logout</a></li>
+            <li><a href='/'>Home</a></li>
+        </ul>
+</nav>
+<hr>
+{% if message== False %}
+    <h1 style="text-align: center;color:red;">You cannot like a photo twice!</h1>
+{% else %}
+    <h1 style="text-align: center;color:red;">You successfully liked this photo.</h1>
+{% endif %}
+<div class="photos">
+    <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}' style="max-width: 100%; height: auto;"/>
+    <h4>Number of Likes: {{ numlikes }}</h4>
+    <h4>Users that liked this photo:</h4>
+    <ul>
+        {% for user in likedusers %}
+        <li style="display: inline; margin-left: 0.8vw;margin-right: 0.8vw;"> {{ user[0] }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+</body>
+<ul>
+    {% if distinction == '1' %}
+        <li><a href='/onealbum?aid={{ aid }}'>Back to Album "{{ albumname }}"</a></li>
+    {% elif distinction == '2' %}
+         <li><a href='/onetag?description={{ description }}'>Back to tag "{{ description }}"</a></li>
+    {% elif distinction == '0' %}
+         <li><a href='/browse'>Back to browse"</a></li>
+    {% endif %}
+    <li><a href='/'>Home</a></li>
+</ul>
+</html>

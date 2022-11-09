@@ -1,0 +1,107 @@
+<!-- author ben lawson (balawson@bu.edu) -->
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Upload a photo!</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;}
+        a{
+            font-size: calc(5px + 0.8vw);
+            color: #b75036;
+        }
+        a:hover {
+            color: #deb344;
+            text-decoration: none;
+        }
+        nav li{
+            margin: 0.5vh 1.5em;
+            padding: 0.5vh 0;
+            box-sizing: border-box;
+            width: 80%;
+            font-size: 15px;
+            display: inline;
+            text-align: center;
+        }
+        nav ul {
+            padding-inline-start: 0;
+            margin-block-start: 0;
+            margin:auto;
+            margin: 3vh 1vw;
+            text-align:center;
+		    box-sizing:border-box;
+            border-bottom: solid gray(1) 5px;
+        }
+        nav a {
+            color: #5aa7e8;
+            font-size: calc(4px + 1vw);
+        }
+        nav a:hover {
+            color: #81e0e0;
+            text-decoration: none;
+        }
+        nav{
+            border-bottom: solid gray(1) 5px;
+
+        }
+        .photos{
+            border: double 8px darkred;
+            padding: 2vh 3vw;
+        }
+        h3.caption , h3.tag{border-bottom: dashed dimgrey 2px;
+            margin: 0;
+        }
+        h3.caption{
+            text-align: center;
+        }
+
+    </style>
+</head>
+    <body>
+    <nav>
+        <ul>
+            <li><a href='/friend'>Add a new friend</a> </li>
+            <li><a href='/search'>Go to search</a></li>
+            <li><a href='/browse'>Browse photos</a></li>
+            <li><a href='/youmaylike'>Photos you may also like</a></li>
+            <li><a href='/logout'>Logout</a></li>
+            <li><a href='/'>Home</a></li>
+        </ul>
+    </nav>
+    <hr>
+        <div class="title">
+            <h2>Upload a photo to Album "{{ albumname }}"</h2>
+        </div>
+            <form method="post" enctype="multipart/form-data" action="/upload">
+                <input type="hidden" name="aid" value={{ aid }}>
+                <label for="photo">Select photo:</label>
+                <input type="file" name="photo" required='true' /><br />
+                <label for="caption">Caption*:</label>
+                <input type="text" name="caption" required='true' /><br />
+
+                <label for="choosetag">Choose a tag:</label>
+                    {% if tags %}
+                        <select name="choosetag" id="choosetag" multiple>
+                        {% for tag in tags %}
+                        <option value={{ tag[0] }}>{{ tag[0] }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <select name="choosetag" id="choosetag">
+                        <option value="">Empty</option>
+                    {% endif %}
+                </select>
+                <sub style="margin:0;">Hold down the Ctrl(Windows) or Command(Mac) button to select multiple options.</sub><br>
+
+                <label for="newtag">Or create new tags:</label>
+                <input type="text" name="newtag" /><br />
+                <sub style="margin:0;">Use the format(No spaces): a;b;c...</sub><br>
+                <input type="submit" value="Upload" >
+            </form>
+
+<hr>
+<p style="text-align: center"><a href="#top">Back to top</a></p>
+</body>
+</html>
+

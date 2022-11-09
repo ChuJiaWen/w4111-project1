@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add a friend</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;}
+        a{
+            font-size: calc(5px + 0.8vw);
+            color: #b75036;
+        }
+        a:hover {
+            color: #deb344;
+            text-decoration: none;
+        }
+        nav li{
+            margin: 0.5vh 1.5em;
+            padding: 0.5vh 0;
+            box-sizing: border-box;
+            width: 80%;
+            font-size: 15px;
+            display: inline;
+            text-align: center;
+        }
+        nav ul {
+            padding-inline-start: 0;
+            margin-block-start: 0;
+            margin:auto;
+            margin: 3vh 1vw;
+            text-align:center;
+		    box-sizing:border-box;
+            border-bottom: solid gray(1) 5px;
+        }
+        nav a {
+            color: #5aa7e8;
+            font-size: calc(4px + 1vw);
+        }
+        nav a:hover {
+            color: #81e0e0;
+            text-decoration: none;
+        }
+        nav{
+            border-bottom: solid gray(1) 5px;
+
+        }
+        .photos{
+            border: double 8px darkred;
+            padding: 2vh 3vw;
+        }
+        h3.caption , h3.tag{border-bottom: dashed dimgrey 2px;
+            margin: 0;
+        }
+        h3.caption{
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<nav>
+    <ul>
+        <li><a href='/friend'>Add a new friend</a> </li>
+        <li><a href='/album'>Go to Albums</a></li>
+        <li><a href='/search'>Go to search</a></li>
+        <li><a href='/browse'>Browse photos</a></li>
+        <li><a href='/youmaylike'>Photos you may also like</a></li>
+        <li><a href='/logout'>Logout</a></li>
+        <li><a href='/'>Home</a></li>
+    </ul>
+</nav>
+<hr>
+{% if message =="True" %}
+    <h2 style="color: red; text-align: center;"> Friend Added!</h2>
+{% elif message == "Same" %}
+    <h2 style="color: red; text-align: center;"> You can't add yourself.</h2>
+{% elif message == "False" %}
+    <h2 style="color: red; text-align: center;"> This friend is already in your list.</h2>
+{% else %}
+    <h2 style="color: red; text-align: center;"> Error. </h2>
+{% endif %}
+<div class="friendlist">
+{% if friendlist %}
+    <h2> Here is your friend list:</h2>
+        <ol>
+            <table border="5" cellpadding="5" width="90%" style="margin-left: 0px">
+                <tr>
+                    <th style="white-space:nowrap"><b> No. </b></th>
+                    <th style="white-space:nowrap"><b> First name </b></th>
+                    <th style="white-space:nowrap"><b> Last name </b></th>
+                    <th style="white-space:nowrap"><b> Email </b></th>
+                    <th style="white-space:nowrap"><b> Date of birth </b></th>
+                    <th style="white-space:nowrap"><b> Hometown </b></th>
+                    <th style="white-space:nowrap"><b> Gender </b></th>
+                </tr>
+            {% for friend in friendlist  %}
+            <tr>
+                <td> <li style="margin-left: 40px"></li></td>
+                <td style="text-align: center;">{{ friend[0] }}</td>
+                <td style="text-align: center;">{{ friend[1] }}</td>
+                <td style="text-align: center;">{{ friend[2] }}</td>
+                <td style="text-align: center;">{{ friend[3] }}</td>
+                <td style="text-align: center;">{{ friend[4] }}</td>
+                <td style="text-align: center;">{{ friend[5] }}</td>
+            </tr>
+            {% endfor %}
+            </table>
+        </ol>
+{% endif %}
+</div>
+<hr>
+{% if recommand %}
+<h1>Here are some recommended users for you:</h1>
+    <table border="2" cellpadding="5" width="80%" style="margin-left: 0px">
+                <tr>
+                    <th style="white-space:nowrap"><b> First name </b></th>
+                    <th style="white-space:nowrap"><b> Last name </b></th>
+                    <th style="white-space:nowrap"><b> Email </b></th>
+                    <th style="white-space:nowrap"><b> Date of birth </b></th>
+                    <th style="white-space:nowrap"><b> Hometown </b></th>
+                    <th style="white-space:nowrap"><b> Gender </b></th>
+                    <th style="white-space:nowrap"><b> Number of Common Friend </b></th>
+                    <th style="width:10%"></th>
+                </tr>
+    {% for friend in recommand %}
+            <tr>
+                <td style="text-align: center;">{{ friend[0][0] }}</td>
+                <td style="text-align: center;">{{ friend[0][1] }}</td>
+                <td style="text-align: center;">{{ friend[0][2] }}</td>
+                <td style="text-align: center;">{{ friend[0][3] }}</td>
+                <td style="text-align: center;">{{ friend[0][4] }}</td>
+                <td style="text-align: center;">{{ friend[0][5] }}</td>
+                <td style="text-align: center;">{{ friend[1] }}</td>
+                <td style="text-align: center;"> <a href="/addfriend?femail={{ friend[0][2]}}">Add</a></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <h2>There aren't any recommended users for you.</h2>
+{% endif %}
+<hr>
+<p style="text-align: center"><a href="#top">Back to top</a></p>
+</body>
+</html>

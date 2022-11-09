@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<head>
+    <title>You May Like</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;}
+        a{
+            font-size: calc(5px + 0.8vw);
+            color: #b75036;
+        }
+        a:hover {
+            color: #deb344;
+            text-decoration: none;
+        }
+        nav li{
+            margin: 0.5vh 1.5em;
+            padding: 0.5vh 0;
+            box-sizing: border-box;
+            width: 80%;
+            font-size: 15px;
+            display: inline;
+            text-align: center;
+        }
+        nav ul {
+            padding-inline-start: 0;
+            margin-block-start: 0;
+            margin:auto;
+            margin: 3vh 1vw;
+            text-align:center;
+		    box-sizing:border-box;
+            border-bottom: solid gray(1) 5px;
+        }
+        nav a {
+            color: #5aa7e8;
+            font-size: calc(4px + 1vw);
+        }
+        nav a:hover {
+            color: #81e0e0;
+            text-decoration: none;
+        }
+        nav{
+            border-bottom: solid gray(1) 5px;
+
+        }
+        img.photos{
+            width:80%;
+            max-width: 100%;
+            height:auto;
+            box-sizing: border-box;
+        }
+        .photos{
+            border: double 6px darkred;
+            padding: 2vh 3vw;
+            margin:1vh 0;
+        }
+        .user {
+            border: dashed 8px midnightblue;
+            padding: 2vh 3vw;
+            margin: 10vh 2vw;
+        }
+        .album{
+            border-top: dotted 6px darkslategrey;
+            border-bottom: dotted 6px darkslategrey;
+        }
+        h3.caption , h3.tag, h3.album{border-bottom: dashed dimgrey 2px;
+            margin: 0;
+        }
+        h3.caption, h3.photos {
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<nav>
+    <ul>
+        <li><a href='/friend'>Add a new friend</a> </li>
+        <li><a href='/album'>Go to Albums</a></li>
+        <li><a href='/search'>Go to search</a></li>
+        <li><a href='/browse'>Browse photos</a></li>
+        <li><a href='/youmaylike'>Photos you may also like</a></li>
+        <li><a href='/logout'>Logout</a></li>
+        <li><a href='/'>Home</a></li>
+    </ul>
+</nav>
+<hr>
+    <h2>This is the list of tags ordered by popularity. (From left to right in descending order) </h2>
+    <ol style="list-style-type: none;">
+        {% for tag in taglist %}
+        <li style="display: inline; margin: 2vh 1vw;">
+            <a href="/onetag?description={{ tag[0] }}">#{{ tag[0] }}</a>
+        </li>
+        {% endfor %}
+    </ol>
+
+
+
+    {% for user in users %}
+        <div class="user">
+        <h2>User: {{ user[1] }}</h2>
+       {%  for album in  user[2]  %}
+           <div class="album">
+           <h3><a href="/onealbum?aid={{ album[0] }}">Album: {{ album[1] }}</a></h3>
+           <ul>
+           {% for photo in album[2] %}
+               <div class="photos">
+               <li><h3 class="caption">Caption: {{photo[0][2]}}</h3></li>
+               <li><h3 class="tag" style="display: inline;">Tags:
+                {% for tag in photo[2] %}
+                    <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
+                {% endfor %}
+            </h3></li>
+                <br>
+                <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}' style="max-width: 100%; height: auto;"/></li>
+               <form method="post" enctype="multipart/form-data" action='/like'>
+               <input type="hidden" name="distinction" value=0>
+               <input type="hidden" name="aid" value={{ photo[0][3] }}>
+                <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                <input type="submit" value="Like ({{ photo[1] }})" size="20" />
+            </form>
+               <h3>Comments:</h3>
+            <table border="2" cellpadding="5" width="100%">
+                        <tr>
+                            <td><b> Commenter </b></td>
+                            <td><b> Comment </b></td>
+                            <td><b> Date </b></td>
+                        </tr>
+            {% for comment in album[3] %}
+                {% if comment[2] == photo[0][1] %}
+                        <tr>
+                            <td>{{ comment[5] }}</td>
+                            <td>{{ comment[0] }}</td>
+                            <td>{{ comment[1] }}</td>
+                        </tr>
+                {% endif %}
+            {% endfor %}
+            </table>
+            <br>
+                {% if uid !=  user[0]  %}
+                    <form method="post" enctype="multipart/form-data" action="/browse">
+                        <input type="hidden" name="aid" value={{ album[0] }}>
+                        <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                        <label for="comment">Leave your comment:</label>
+                        <input type="text" name="comment" size="100" />
+                        <input type="submit" value="Send" />
+                    </form>
+                {% endif %}
+               </div>
+
+           {% endfor %}
+           </ul>
+           </div>
+
+       {% endfor %}
+        </div>
+    {% endfor %}
+
+<hr>
+
+<hr>
+<p style="text-align: center"><a href="#top">Back to top</a></p>
+</body>
+</html>
