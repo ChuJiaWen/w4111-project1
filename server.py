@@ -197,11 +197,39 @@ def teardown_request(exception):
     pass
 
 
+def getRecommandFriend(uid):
+    result = g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid ='{0}' ".format(uid)).fetchall()
+    friendlist = []
+    for f in result:
+        person = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE uid ='{0}' ".
+                       format(f[0])).fetchall()[0]
+        friendlist.append(person)
+    count = {}
+    for f in result:
+        fuid = f[0]
+        ff = getUserFriendId(fuid)
+        for stranger in ff:
+            print(stranger)
+            if stranger[0] == uid:
+                continue
+            if stranger not in result and stranger[0] not in count:
+                count[stranger[0]] = 1
+            elif stranger not in result:
+                count[stranger[0]] = count[stranger[0]] + 1
+    recommand = []
+    count = sorted(count.items(), key=lambda item: item[1], reverse=True)
+    for fuid in count:
+        if fuid[1] != 0:
+            user = g.conn.execute(
+                "SELECT first_name, last_name, email, DOB, hometown, gender, uid FROM Users WHERE uid ='{0}' ".
+                    format(fuid[0])).fetchone()
+            recommand.append([user, fuid[1]])
+    return recommand
 def getUserIdFromEmail(email):
     userId = g.conn.execute("SELECT uid  FROM Users WHERE email = '{0}'".format(email)).fetchall()
     return userId[0][0]
 
-def getFriends(uid):
+def getUserFriend(uid):
     friendlist = []
     # cursor = conn.cursor()
     result = g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid ='{0}' ".format(uid)).fetchall()
@@ -210,6 +238,9 @@ def getFriends(uid):
                               format(f[0])).fetchall()[0]
         friendlist.append(info)
     return friendlist
+
+def getUserFriendId(uid):
+    return g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid = '{0}'".format(uid)).fetchall()
 @app.route("/friend", methods=['GET','POST'])
 @flask_login.login_required
 def searchfriend():
@@ -246,16 +277,16 @@ def searchfriend():
                     searchlist.append(temp)
         recommand = []
         # recommand = getRecommandFriend(uid)
-        friendlist = getFriends(uid)
+        friendlist = getUserFriend(uid)
         if searchlist:
             return render_template('friend.html', searchlist=searchlist, recommand=recommand,friendlist=friendlist)
         else:
             return render_template('friend.html', searchlist=None, recommand=recommand,friendlist=friendlist)
     else:
         uid = getUserIdFromEmail(flask_login.current_user.id)
-        friendlist = getFriends(uid)
-        # recommand = getRecommandFriend(uid)
-        recommand = []
+        friendlist = getUserFriend(uid)
+        recommand = getRecommandFriend(uid)
+        # recommand = []
         return render_template('friend.html',friendlist=friendlist,recommand=recommand)
 
 
@@ -289,8 +320,8 @@ def addfriend():
             person = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE uid ='{0}' ".
                            format(f[0])).fetchone()
             friendlist.append(person)
-        # recommand = getRecommandFriend(uid)
-        recommand = []
+        recommand = getRecommandFriend(uid)
+        # recommand = []
         return render_template('addfriend.html', message=message, friendlist=friendlist,recommand=recommand)
 
 
