@@ -1,5 +1,3 @@
-import base64
-
 from flask import request, render_template, g
 from backend import user_resource, photo_resource
 
@@ -87,4 +85,4 @@ def post_onealbum(uid, request):
         comments = photo_resource.getPhotoComment(pid)
         photolist.append([photo, numlikes, tags,comments])
     return render_template('onealbum.html', uid=uid, owneruid=owneruid[0], name=getAlbumName(aid), aid=aid,
-                           photos=photolist, base64=base64)
+                           photos=photolist)

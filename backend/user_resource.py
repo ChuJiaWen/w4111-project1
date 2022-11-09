@@ -1,3 +1,5 @@
+import json
+
 import flask_login
 from flask import Flask, request, render_template, g, redirect, Response, url_for
 
@@ -131,18 +133,42 @@ def getUserFriend(uid):
 def getUserFriendId(uid):
     return g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid = '{0}'".format(uid)).fetchall()
 
-def getAllPhotos():
-    cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT uid FROM Photos")
-    uidlist = cursor.fetchall()
+def is_private(uid):
+    return g.conn.execute("SELECT is_private FROM Users WHERE uid = '{0}'".format(uid)).fetchone()[0]
+
+def is_friend(uid,fuid):
+    result = g.conn.execute("SELECT COUNT(*)  FROM Is_Friend WHERE uid = '{0}' AND fuid = '{1}'".format(uid,fuid)).fetchone()
+    if len(result) != 0:
+        return True
+    else:
+        return False
+
+def getAllPhotos(uid):
+    """uid = current logged-in user; user_id = accounts in database"""
+    uidlist = g.conn.execute("SELECT DISTINCT uid FROM Users").fetchall()
     users=[]
-    for uid in uidlist:
-        users.append([uid[0],getUsersName(uid[0])])
-    for j in range(0,len(users)):
+    photos = []
+    for user in uidlist:
+        #get photos of an account if it satisfies one of the condition
+        user_id=user[0]
+        if not is_private(user_id):#if account is public
+            users.append([user_id,getUsersName(user_id)])
+        elif is_private(user_id) and is_friend(uid,user_id): #if account is private and user is account's friend
+            users.append([user_id, getUsersName(user_id)])
+    print("This is users inside user_resource/getAllPhotos:", users)
+    """
+    user1 = '{ "user_name": user_name,
+                "albums" : { "aid":aid, "album_name": aname, "photo": {"pid": pid, "caption":caption, "img_data":img_data, 
+                                                                        "tags": tags(list of tags), "numlikes": numlikes, 
+                                                                        "comments": {"cid": cid, "text":comment_text,
+                                                                         "user_name":comment_uname}}}
+    }'
+    """
+    for (user_id, user_name) in users:
         #[(uid,firstname),[(aid,name)]]
-        albums=getUsersAlbums(users[j][0])
-        for z in range(0,len(albums)):
-            aid=albums[z][0]
+        albums=getUsersAlbums(user_id)
+        for album in albums:
+            aid=album[0]
             aname =albums[z][1]
             users[j].append([])
             users[j][2].append([aid,aname,[],[]])

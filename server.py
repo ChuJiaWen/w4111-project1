@@ -16,7 +16,7 @@ from flask import Flask, request, render_template, g, redirect, Response
 import flask_login
 from datetime import datetime
 
-from backend import user_resource, photo_resource, album_resource
+from backend import user_resource, photo_resource, album_resource, general_resource
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -172,43 +172,6 @@ def addfriend():
             friendlist.append(person)
         recommand = user_resource.getRecommandFriend(uid)
         return render_template('addfriend.html', message=message, friendlist=friendlist, recommand=recommand)
-
-
-@app.route("/browse", methods=['GET', 'POST'])
-# @flask_login.login_required
-def browse():
-    uid = 12
-    photos = []
-    base64 = []
-    taglist = []
-    if request.method == 'GET':
-        # photos = getAllPhotos()
-        # if flask_login.current_user.is_authenticated == False:
-        #     uid = getUserIdFromEmail("anonymous@bu.edu")
-        # else:
-        #     uid = getUserIdFromEmail(flask_login.current_user.id)
-        # taglist = getAllTags()
-        return render_template('browse.html', uid=uid, users=photos, base64=base64, taglist=taglist)
-    else:
-        # cursor = conn.cursor()
-        # aid = request.form.get('aid')
-        # owneruid = getAlbumOwner(aid)
-        # if flask_login.current_user.is_authenticated == False:
-        #     uid = getUserIdFromEmail("anonymous@bu.edu")
-        # else:
-        #     uid = getUserIdFromEmail(flask_login.current_user.id)
-        # comment = request.form.get('comment')
-        # date = datetime.today().strftime('%Y-%m-%d,%H:%M:%S')
-        # uname = getUsersName(uid)
-        # pid=request.form.get('pid')
-        # cursor.execute(
-        #     '''INSERT INTO  Comments_Leaves_Has (comment,date, pid, aid,uid,uname) VALUES (%s, %s,%s,%s, %s,%s )''',
-        #     (comment, date, pid, aid, uid, uname))
-        # newcontribution = getUserContribution(uid) + 1
-        # cursor.execute("UPDATE Users SET contribution='{1}'  WHERE uid = '{0}'".format(uid,newcontribution))
-        # conn.commit()
-        # photos = getAllPhotos()
-        return render_template('browse.html', uid=uid, users=photos, base64=base64)
 
 
 #
@@ -398,6 +361,33 @@ def upload_file():
         return photo_resource.get_upload_photo(aid=request.args.get('aid'))
     else:
         return photo_resource.post_upload_photo(uid, request)
+
+@app.route("/browse", methods=['GET','POST'])
+#@flask_login.login_required
+def browse():
+    if flask_login.current_user.is_authenticated == False:
+        uid = getUserIdFromEmail("anonymous@columbia.edu")
+    else:
+        uid = getUserIdFromEmail(flask_login.current_user.id)
+
+    if request.method=='GET':
+        return general_resource.get_browse(uid)
+    else:
+        cursor = conn.cursor()
+        aid = request.form.get('aid')
+        owneruid = getAlbumOwner(aid)
+        comment = request.form.get('comment')
+        date = datetime.today().strftime('%Y-%m-%d,%H:%M:%S')
+        uname = getUsersName(uid)
+        pid=request.form.get('pid')
+        cursor.execute(
+            '''INSERT INTO  Comments_Leaves_Has (comment,date, pid, aid,uid,uname) VALUES (%s, %s,%s,%s, %s,%s )''',
+            (comment, date, pid, aid, uid, uname))
+        newcontribution = getUserContribution(uid) + 1
+        cursor.execute("UPDATE Users SET contribution='{1}'  WHERE uid = '{0}'".format(uid,newcontribution))
+        conn.commit()
+        photos = getAllPhotos()
+        return render_template('browse.html', uid=uid, users=photos, base64=base64)
 
 
 if __name__ == "__main__":
