@@ -13,9 +13,10 @@ import os
 import flask
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, g, redirect, Response, url_for
 import flask_login
-import user_resource
+
+import album_resource,user_resource,photo_resource
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -56,118 +57,6 @@ engine = create_engine(DATABASEURI)
 
 users = engine.execute("SELECT email from Users").fetchall()
 
-def getUserList():
-    users = g.conn.execute("SELECT email from Users").fetchall()
-    return users
-
-class User(flask_login.UserMixin):
-    pass
-@login_manager.user_loader
-def user_loader(email):
-    users = getUserList()
-    if not(email) or email not in str(users):
-        return
-    user = User()
-    user.id = email
-    return user
-@login_manager.request_loader
-def request_loader(request):
-    users = getUserList()
-    email = request.form.get('email')
-    if not(email) or email not in str(users):
-        return
-    user = User()
-    cursor = g.conn
-    cursor.execute("SELECT password FROM Users WHERE email = '{0}'".format(email))
-    data = cursor.fetchall()
-    pwd = str(data[0][0] )
-    if request.form['password'] == pwd:
-        user.id = email
-        return user
-    return None
-
-@app.route('/profile')
-@flask_login.login_required
-def protected():
-    print("Reached protected()")
-    uid = user_resource.getUserIdFromEmail(flask_login.current_user.id)
-    print("uid is:",uid)
-    return render_template('hello.html', name=user_resource.getUsersName(uid), message="Here's your profile")
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if flask.request.method == 'GET':
-        return '''
-               <form action='login' method='POST'>
-                <input type='text' name='email' id='email' placeholder='email'></input>
-                <input type='password' name='password' id='password' placeholder='password'></input>
-                <input type='submit' name='submit'></input>
-               </form></br>
-           <a href='/'>Home</a>
-               '''
-    #The request method is POST (page is recieving data)
-    email = flask.request.form['email']
-    #check if email is registered
-    result = g.conn.execute("SELECT password FROM Users WHERE email = '{0}'".format(email)).fetchall()
-    if len(result)>0:
-        # data = cursor.fetchall()
-        # pwd = str(data[0][0] )
-        pwd = str(result[0]['password'])
-        if flask.request.form['password'] == pwd:
-            print("Password matches!")
-            user = User()
-            user.id = email
-            flask_login.login_user(user) #okay login in user
-
-            return flask.redirect(flask.url_for('protected')) #protected is a function defined in this file
-
-    #information did not match
-    print("Email not found or password not correct")
-    return "<a href='/login'>Try again</a>\
-            </br><a href='/register'>or make an account</a>"
-
-@app.route('/logout')
-def logout():
-    flask_login.logout_user()
-    return render_template('hello.html', message='Logged out')
-
-@login_manager.unauthorized_handler
-def unauthorized_handler():
-    return render_template('unauth.html')
-
-#you can specify specific methods (GET/POST) in function header instead of inside the functions as seen earlier
-@app.route("/register", methods=['GET'])
-def register():
-    return render_template('register.html', supress=True)
-
-@app.route("/register", methods=['POST'])
-def register_user():
-    try:
-        email=request.form.get('email')
-        password=request.form.get('password')
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        hometown = request.form.get('hometown')
-        gender = request.form.get('gender')
-        DOB = request.form.get('DOB')
-        is_private = request.form.get('is_private')
-    except:
-        print("couldn't find all tokens") #this prints to shell, end users will not see this (all print statements go to shell)
-        return flask.redirect(flask.url_for('register'))
-    cursor = g.conn
-    test =  user_resource.isEmailUnique(email)
-    if test:
-        print(cursor.execute("INSERT INTO Users (email, password,first_name,last_name,hometown,gender, DOB,is_private) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}','{6}',{7})".format(email, password,first_name,last_name,hometown,gender, DOB,is_private)))
-        # conn.commit()
-        #log user in
-        user = User()
-        user.id = email
-        flask_login.login_user(user)
-        return render_template('hello.html', name=first_name, message='Account Created!')
-    else:
-        return render_template('register.html', supress=False)
-
-
 @app.before_request
 def before_request():
   """
@@ -194,7 +83,6 @@ def teardown_request(exception):
     g.conn.close()
   except Exception as e:
     pass
-
 
 #
 # @app.route is a decorator around index() that means:
@@ -269,6 +157,110 @@ def index():
 # Notice that the function name is another() rather than index()
 # The functions for each app.route need to have different names
 #
+
+def getUserList():
+    users = g.conn.execute("SELECT email from Users").fetchall()
+    return users
+def getUserIdFromEmail(email):
+    result = g.conn.execute("SELECT uid  FROM Users WHERE email = '{0}'".format(email)).fetchone()
+    print("Getting uid:",result, result[0])
+    return result[0]
+
+class User(flask_login.UserMixin):
+    pass
+@login_manager.user_loader
+def user_loader(email):
+    users = getUserList()
+    if not(email) or email not in str(users):
+        return
+    user = User()
+    user.id = email
+    return user
+@login_manager.request_loader
+def request_loader(request):
+    users = getUserList()
+    email = request.form.get('email')
+    if not(email) or email not in str(users):
+        return
+    user = User()
+    cursor = g.conn
+    cursor.execute("SELECT password FROM Users WHERE email = '{0}'".format(email))
+    data = cursor.fetchall()
+    pwd = str(data[0][0] )
+    if request.form['password'] == pwd:
+        user.id = email
+        return user
+    return None
+
+@app.route('/profile')
+@flask_login.login_required
+def protected():
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+    print("uid is:",uid)
+    return render_template('hello.html', name=user_resource.getUsersName(uid), message="Here's your profile")
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return user_resource.get_login_page()
+    else:
+        #The request method is POST (page is recieving data)
+        email = request.form['email']
+        password = request.form['password']
+        return user_resource.post_login_page(email, password)
+
+@app.route('/logout')
+def logout():
+    flask_login.logout_user()
+    return render_template('hello.html', message='Logged out')
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return render_template('unauth.html')
+
+#you can specify specific methods (GET/POST) in function header instead of inside the functions as seen earlier
+@app.route("/register", methods=['GET'])
+def register():
+    return render_template('register.html', supress=True)
+
+@app.route("/register", methods=['POST'])
+def register_user():
+    form_data = request.form
+    return user_resource.register_account(form_data)
+
+@app.route('/album', methods=['GET', 'POST'])
+@flask_login.login_required
+def create_album():
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+    if request.method == 'POST':
+        return album_resource.post_create_album(uid, form_data=request.form)
+
+    #The method is GET so we return a  HTML form to upload the a photo.
+    else:
+        return render_template('album.html',album=user_resource.getUsersAlbums(uid))
+
+@app.route("/onealbum", methods=['GET','POST'])
+@flask_login.login_required
+def onealbum():
+    # if flask_login.current_user.is_authenticated == False:
+    #     uid = getUserIdFromEmail("anonymous@bu.edu")
+    # else:
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+
+    if request.method == 'POST':
+        return album_resource.post_onealbum(uid, request)
+    else:
+        return album_resource.get_onealbum(uid, args_data=request.args)
+
+@app.route('/upload', methods=['GET', 'POST'])
+@flask_login.login_required
+def upload_file():
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+    if request.method == 'GET':
+        return photo_resource.get_upload_photo(aid=request.args.get('aid'))
+    else:
+        return photo_resource.post_upload_photo(uid, request)
+
 
 
 
