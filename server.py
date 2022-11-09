@@ -48,18 +48,17 @@ engine = create_engine(DATABASEURI)
 # Example of running queries in your database
 # Note that this will probably not work if you already have a table named 'test' in your database, containing meaningful data. This is only an example showing you how to run queries in your database using SQLAlchemy.
 #
-engine.execute("""CREATE TABLE IF NOT EXISTS test (
-  id serial,
-  name text
-);""")
+# engine.execute("""CREATE TABLE IF NOT EXISTS test (
+#   id serial,
+#   name text
+# );""")
 # engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
 
 users = engine.execute("SELECT email from Users").fetchall()
 
 def getUserList():
-    cursor = g.conn
-    cursor.execute("SELECT email from Users")
-    return cursor#.fetchall()
+    users = g.conn.execute("SELECT email from Users").fetchall()
+    return users
 
 class User(flask_login.UserMixin):
     pass
@@ -244,7 +243,7 @@ def index():
 
   print(names)
 
-  #
+
   # Flask uses Jinja templates, which is an extension to HTML where you can
   # pass data to a template and dynamically generate HTML based on the data
   # (you can think of it as simple PHP)
@@ -270,23 +269,8 @@ def index():
 # Notice that the function name is another() rather than index()
 # The functions for each app.route need to have different names
 #
-@app.route('/another')
-def another():
-  return render_template("another.html")
 
 
-# Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  g.conn.execute('INSERT INTO test(name) VALUES (%s)', name)
-  return redirect('/')
-
-
-# @app.route('/login')
-# def login():
-#     abort(401)
-#     this_is_never_executed()
 
 
 if __name__ == "__main__":
