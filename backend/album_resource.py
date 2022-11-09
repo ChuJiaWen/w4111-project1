@@ -1,7 +1,7 @@
 import base64
 
 from flask import request, render_template, g
-import user_resource, photo_resource
+from backend import user_resource, photo_resource
 
 
 def getAlbumName(aid):

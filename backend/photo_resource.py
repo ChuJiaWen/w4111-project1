@@ -1,6 +1,6 @@
 from flask import render_template, g
 
-import album_resource, tag_resource
+from backend import album_resource, tag_resource
 from datetime import datetime
 
 def getPhoto(pid):

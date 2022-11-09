@@ -1,7 +1,7 @@
 import flask_login
 from flask import Flask, request, render_template, g, redirect, Response, url_for
 
-import album_resource,user_resource
+from backend import album_resource,user_resource
 from datetime import datetime
 
 def getAllTags():
