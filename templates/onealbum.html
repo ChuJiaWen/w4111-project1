@@ -82,23 +82,23 @@
         <ul>
         {% for photo in photos %}
             <div class="photos">
-            <li><h3 class="caption">Caption: {{photo[0][2]}}</h3></li>
+            <li><h3 class="caption">Caption: {{photo[0][1]}}</h3></li>
             <li><h3 class="tag" style="display: inline;">Tags:
                 {% for tag in photo[2] %}
                     <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
                 {% endfor %}
             </h3></li>
                 <br>
-                <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}' style="max-width: 100%; height: auto;"/>
+                <img src='{{ photo[0][2] }}' style="max-width: 100%; height: auto;"/>
                 <form method="post" enctype="multipart/form-data" action="/like">
                     <input type="hidden" name="aid" value={{ aid }}>
-                    <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                    <input type="hidden" name="pid" value={{ photo[0][0] }}>
                     <input type="hidden" name="distinction" value=1>
                     <input type="submit" value="Like ({{ photo[1] }})" size="10" />
                 </form>
                 {% if uid == owneruid %}
                     <form method="post" enctype="multipart/form-data" action="/onealbum?aid={{ aid }}">
-                    <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                    <input type="hidden" name="pid" value={{ photo[0][0] }}>
                     <input type="hidden" name="distinction" value='1'>
                     <input type="submit" value="Delete this photo" />
                 </form>
@@ -124,7 +124,7 @@
                 <br>
             {% if uid !=  owneruid  %}
                 <form method="post" enctype="multipart/form-data" action="/onealbum?aid={{ aid }}">
-                    <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                    <input type="hidden" name="pid" value={{ photo[0][0] }}>
                     <input type="hidden" name="distinction" value='0'>
                     <label for="comment">Leave your comment:</label>
                     <input type="text" name="comment" size="100" />
