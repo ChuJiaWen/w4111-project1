@@ -90,9 +90,7 @@ def request_loader(request):
 @app.route('/profile')
 @flask_login.login_required
 def protected():
-    print("Reached protected()")
     uid = user_resource.getUserIdFromEmail(flask_login.current_user.id)
-    print("uid is:",uid)
     return render_template('hello.html', name=user_resource.getUsersName(uid), message="Here's your profile")
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -158,7 +156,7 @@ def register_user():
     cursor = g.conn
     test =  user_resource.isEmailUnique(email)
     if test:
-        print(cursor.execute("INSERT INTO Users (email, password,first_name,last_name,hometown,gender, DOB,is_private) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}','{6}',{7})".format(email, password,first_name,last_name,hometown,gender, DOB,is_private)))
+        cursor.execute("INSERT INTO Users (email, password,first_name,last_name,hometown,gender, DOB,is_private) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}','{6}',{7})".format(email, password,first_name,last_name,hometown,gender, DOB,is_private))
         # conn.commit()
         #log user in
         user = User()
@@ -197,50 +195,6 @@ def teardown_request(exception):
     pass
 
 
-def getRecommandFriend(uid):
-    result = g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid ='{0}' ".format(uid)).fetchall()
-    friendlist = []
-    for f in result:
-        person = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE uid ='{0}' ".
-                       format(f[0])).fetchall()[0]
-        friendlist.append(person)
-    count = {}
-    for f in result:
-        fuid = f[0]
-        ff = getUserFriendId(fuid)
-        for stranger in ff:
-            print(stranger)
-            if stranger[0] == uid:
-                continue
-            if stranger not in result and stranger[0] not in count:
-                count[stranger[0]] = 1
-            elif stranger not in result:
-                count[stranger[0]] = count[stranger[0]] + 1
-    recommand = []
-    count = sorted(count.items(), key=lambda item: item[1], reverse=True)
-    for fuid in count:
-        if fuid[1] != 0:
-            user = g.conn.execute(
-                "SELECT first_name, last_name, email, DOB, hometown, gender, uid FROM Users WHERE uid ='{0}' ".
-                    format(fuid[0])).fetchone()
-            recommand.append([user, fuid[1]])
-    return recommand
-def getUserIdFromEmail(email):
-    userId = g.conn.execute("SELECT uid  FROM Users WHERE email = '{0}'".format(email)).fetchall()
-    return userId[0][0]
-
-def getUserFriend(uid):
-    friendlist = []
-    # cursor = conn.cursor()
-    result = g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid ='{0}' ".format(uid)).fetchall()
-    for f in result:
-        info = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE uid ='{0}' ".
-                              format(f[0])).fetchall()[0]
-        friendlist.append(info)
-    return friendlist
-
-def getUserFriendId(uid):
-    return g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid = '{0}'".format(uid)).fetchall()
 @app.route("/friend", methods=['GET','POST'])
 @flask_login.login_required
 def searchfriend():
@@ -275,18 +229,16 @@ def searchfriend():
             for temp in search:
                 if temp[2] != 'anonymous@bu.edu':
                     searchlist.append(temp)
-        recommand = []
-        # recommand = getRecommandFriend(uid)
-        friendlist = getUserFriend(uid)
+        recommand = user_resource.getRecommandFriend(uid)
+        friendlist = user_resource.getUserFriend(uid)
         if searchlist:
             return render_template('friend.html', searchlist=searchlist, recommand=recommand,friendlist=friendlist)
         else:
             return render_template('friend.html', searchlist=None, recommand=recommand,friendlist=friendlist)
     else:
-        uid = getUserIdFromEmail(flask_login.current_user.id)
-        friendlist = getUserFriend(uid)
-        recommand = getRecommandFriend(uid)
-        # recommand = []
+        uid = user_resource.getUserIdFromEmail(flask_login.current_user.id)
+        friendlist = user_resource.getUserFriend(uid)
+        recommand = user_resource.getRecommandFriend(uid)
         return render_template('friend.html',friendlist=friendlist,recommand=recommand)
 
 
@@ -298,8 +250,8 @@ def addfriend():
         if femail is None:
             message = "None"
             return render_template('addfriend.html', message=message)
-        fuid = getUserIdFromEmail(femail)
-        uid = getUserIdFromEmail(flask_login.current_user.id)
+        fuid = user_resource.getUserIdFromEmail(femail)
+        uid = user_resource.getUserIdFromEmail(flask_login.current_user.id)
         DOF = datetime.today().strftime('%Y-%m-%d')
         count = len(g.conn.execute("SELECT * FROM Is_Friend WHERE uid ='{0}' AND fuid = '{1}'".format(uid,fuid)).fetchall())
         if fuid == uid:
@@ -320,11 +272,45 @@ def addfriend():
             person = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE uid ='{0}' ".
                            format(f[0])).fetchone()
             friendlist.append(person)
-        recommand = getRecommandFriend(uid)
-        # recommand = []
+        recommand = user_resource.getRecommandFriend(uid)
         return render_template('addfriend.html', message=message, friendlist=friendlist,recommand=recommand)
 
 
+@app.route("/browse", methods=['GET','POST'])
+#@flask_login.login_required
+def browse():
+    uid = 12
+    photos = []
+    base64 = []
+    taglist = []
+    if request.method=='GET':
+        # photos = getAllPhotos()
+        # if flask_login.current_user.is_authenticated == False:
+        #     uid = getUserIdFromEmail("anonymous@bu.edu")
+        # else:
+        #     uid = getUserIdFromEmail(flask_login.current_user.id)
+        # taglist = getAllTags()
+        return render_template('browse.html',uid=uid, users= photos,base64=base64,taglist=taglist)
+    else:
+        # cursor = conn.cursor()
+        # aid = request.form.get('aid')
+        # owneruid = getAlbumOwner(aid)
+        # if flask_login.current_user.is_authenticated == False:
+        #     uid = getUserIdFromEmail("anonymous@bu.edu")
+        # else:
+        #     uid = getUserIdFromEmail(flask_login.current_user.id)
+        # comment = request.form.get('comment')
+        # date = datetime.today().strftime('%Y-%m-%d,%H:%M:%S')
+        # uname = getUsersName(uid)
+        # pid=request.form.get('pid')
+        # cursor.execute(
+        #     '''INSERT INTO  Comments_Leaves_Has (comment,date, pid, aid,uid,uname) VALUES (%s, %s,%s,%s, %s,%s )''',
+        #     (comment, date, pid, aid, uid, uname))
+        # newcontribution = getUserContribution(uid) + 1
+        # cursor.execute("UPDATE Users SET contribution='{1}'  WHERE uid = '{0}'".format(uid,newcontribution))
+        # conn.commit()
+        # photos = getAllPhotos()
+        return render_template('browse.html', uid=uid, users=photos, base64=base64)
 
 
 #
