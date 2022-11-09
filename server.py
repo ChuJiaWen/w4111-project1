@@ -16,6 +16,7 @@ from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response
 import flask_login
 import user_resource
+from datetime import datetime
 
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -194,6 +195,136 @@ def teardown_request(exception):
     g.conn.close()
   except Exception as e:
     pass
+
+
+def getRecommandFriend(uid):
+    result = g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid ='{0}' ".format(uid)).fetchall()
+    friendlist = []
+    for f in result:
+        person = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE uid ='{0}' ".
+                       format(f[0])).fetchall()[0]
+        friendlist.append(person)
+    count = {}
+    for f in result:
+        fuid = f[0]
+        ff = getUserFriendId(fuid)
+        for stranger in ff:
+            print(stranger)
+            if stranger[0] == uid:
+                continue
+            if stranger not in result and stranger[0] not in count:
+                count[stranger[0]] = 1
+            elif stranger not in result:
+                count[stranger[0]] = count[stranger[0]] + 1
+    recommand = []
+    count = sorted(count.items(), key=lambda item: item[1], reverse=True)
+    for fuid in count:
+        if fuid[1] != 0:
+            user = g.conn.execute(
+                "SELECT first_name, last_name, email, DOB, hometown, gender, uid FROM Users WHERE uid ='{0}' ".
+                    format(fuid[0])).fetchone()
+            recommand.append([user, fuid[1]])
+    return recommand
+def getUserIdFromEmail(email):
+    userId = g.conn.execute("SELECT uid  FROM Users WHERE email = '{0}'".format(email)).fetchall()
+    return userId[0][0]
+
+def getUserFriend(uid):
+    friendlist = []
+    # cursor = conn.cursor()
+    result = g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid ='{0}' ".format(uid)).fetchall()
+    for f in result:
+        info = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE uid ='{0}' ".
+                              format(f[0])).fetchall()[0]
+        friendlist.append(info)
+    return friendlist
+
+def getUserFriendId(uid):
+    return g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid = '{0}'".format(uid)).fetchall()
+@app.route("/friend", methods=['GET','POST'])
+@flask_login.login_required
+def searchfriend():
+    if request.method == 'POST':
+        uid = getUserIdFromEmail(flask_login.current_user.id)
+        email = request.form.get('email')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        hometown = request.form.get('hometown')
+        if email and first_name and last_name:
+            search = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE email = '{0}'"
+                           "AND first_name='{1}' AND last_name ='{2}'".format(email, first_name,last_name)).fetchall()
+        elif first_name and last_name:
+            search = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE first_name "
+                           "='{first_name}' AND last_name ='{last_name}'".format(first_name=first_name,
+                                                                                 last_name=last_name)).fetchall()
+        elif first_name:
+            search = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE first_name "
+                           "='{first_name}'".format(first_name=first_name)).fetchall()
+        elif last_name:
+            search = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE last_name "
+                           "='{last_name}'".format(last_name=last_name)).fetchall()
+        elif email:
+            search = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE email = '{0}'"
+                           .format(email)).fetchall()
+        elif hometown:
+            search = g.conn.execute(
+                "SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE hometown = '{0}'".format(
+                    hometown)).fetchall()
+        searchlist=[]
+        if search:
+            for temp in search:
+                if temp[2] != 'anonymous@bu.edu':
+                    searchlist.append(temp)
+        recommand = []
+        # recommand = getRecommandFriend(uid)
+        friendlist = getUserFriend(uid)
+        if searchlist:
+            return render_template('friend.html', searchlist=searchlist, recommand=recommand,friendlist=friendlist)
+        else:
+            return render_template('friend.html', searchlist=None, recommand=recommand,friendlist=friendlist)
+    else:
+        uid = getUserIdFromEmail(flask_login.current_user.id)
+        friendlist = getUserFriend(uid)
+        recommand = getRecommandFriend(uid)
+        # recommand = []
+        return render_template('friend.html',friendlist=friendlist,recommand=recommand)
+
+
+@app.route("/addfriend", methods=['GET'])
+@flask_login.login_required
+def addfriend():
+    if request.method == 'GET':
+        femail = request.args.get('femail')
+        if femail is None:
+            message = "None"
+            return render_template('addfriend.html', message=message)
+        fuid = getUserIdFromEmail(femail)
+        uid = getUserIdFromEmail(flask_login.current_user.id)
+        DOF = datetime.today().strftime('%Y-%m-%d')
+        count = len(g.conn.execute("SELECT * FROM Is_Friend WHERE uid ='{0}' AND fuid = '{1}'".format(uid,fuid)).fetchall())
+        if fuid == uid:
+            message = "Same"
+        elif count == 0 :
+            message = "True"
+            g.conn.execute('''INSERT INTO Is_Friend (date, fuid, uid) VALUES (%s, %s, %s )''' ,(DOF,fuid, uid))
+            g.conn.execute('''INSERT INTO Is_Friend (date, fuid, uid) VALUES (%s, %s, %s )''', (DOF, uid, fuid))
+            # conn.commit()
+        elif count == 1:
+            message = "False"
+        else:
+            message = "Error"
+
+        result = g.conn.execute("SELECT fuid FROM Is_Friend WHERE uid ='{0}' ".format(uid)).fetchall()
+        friendlist =[]
+        for f in result:
+            person = g.conn.execute("SELECT first_name, last_name, email, DOB, hometown, gender FROM Users WHERE uid ='{0}' ".
+                           format(f[0])).fetchone()
+            friendlist.append(person)
+        recommand = getRecommandFriend(uid)
+        # recommand = []
+        return render_template('addfriend.html', message=message, friendlist=friendlist,recommand=recommand)
+
+
 
 
 #
