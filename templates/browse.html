@@ -98,7 +98,7 @@
 
     {% for user in user_photos %}
         <div class="user">
-        <h2>User: {{ user['user_name'] }}</h2>
+        <h2>User: {{ user['owner_name'] }}</h2>
        {%  for album in  user['albums']  %}
            <div class="album">
            <h3><a href="/onealbum?aid={{ album['aid'] }}">Album: {{ album['album_name'] }}</a></h3>
@@ -135,7 +135,7 @@
                 {% endfor %}
             </table>
             <br>
-                {% if uid !=  user['user_id']  %}
+                {% if uid !=  user['owner_id']  %}
                     <form method="post" enctype="multipart/form-data" action="/browse">
                         <input type="hidden" name="aid" value={{ album['aid'] }}>
                         <input type="hidden" name="pid" value={{ photo['pid'] }}>

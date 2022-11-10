@@ -8,14 +8,14 @@ def getPhoto(pid):
     # print("Inside photo_resource/getPhoto(pid), this is info retrived:",result)
     return result
 
-def getPhotoOwner(pid):
-    result = g.conn.execute("SELECT uid FROM Photos WHERE pid ='{0}'".format(pid)).fetchone()
-    return result[0]
+def getPhotoOwner_Album(pid):
+    result = g.conn.execute("SELECT Albums.uid, Albums.aid FROM Albums, Contains WHERE Contains.pid ='{0}' AND Contains.aid=Albums.aid".format(pid)).fetchone()
+    return result
 
 def getPhotoComment(pid):
     result = g.conn.execute("SELECT text, Has_Comments.date, Has_Comments.pid, Users.first_name FROM Has_Comments,Commented, Users \
     WHERE Has_Comments.pid ='{0}' AND Commented.pid = '{0}' AND Has_Comments.cid=Commented.cid AND Users.uid=Commented.uid".format(pid)).fetchall()
-    print("Inside photo_resource/getPhotoComment(pid), this is comments retrived:", result)
+    # print("Inside photo_resource/getPhotoComment(pid), this is comments retrived:", result)
     return result
 
 def getPhotoTag(pid):

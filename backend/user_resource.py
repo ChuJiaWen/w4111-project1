@@ -151,24 +151,24 @@ def getAllPhotos(uid):
     user_photos=[]
     for user in uidlist:
         #get photos of an account if it satisfies one of the condition
-        user_id=user[0]
-        if not is_private(user_id):#if account is public
-            users.append([user_id,getUsersName(user_id)])
-        elif is_private(user_id) and is_friend(uid,user_id): #if account is private and user is account's friend
-            users.append([user_id, getUsersName(user_id)])
-    print("This is users inside user_resource/getAllPhotos:", users)
+        owner_id=user[0]
+        if not is_private(owner_id):#if account is public
+            users.append([owner_id,getUsersName(owner_id)])
+        elif is_private(owner_id) and is_friend(uid,owner_id): #if account is private and user is account's friend
+            users.append([owner_id, getUsersName(owner_id)])
+    # print("This is users inside user_resource/getAllPhotos:", users)
     """
-    user1 = '{  'user_id' : user_id,
-                "user_name": user_name,
+    user1 = '{  'owner_id' : owner_id,
+                "owner_name": owner_name,
                 "albums" : { "aid":aid, "album_name": aname, "photos": {"pid": pid, "caption":caption, "img_data":img_data, 
                                                                         "tags": tags(list of tags), "numlikes": numlikes, 
                                                                         "comments": {"text":comment_text, "date":datae
                                                                          "user_name":comment_uname}}}
     }'
     """
-    for (user_id, user_name) in users:
+    for (owner_id, owner_name) in users:
         #[(uid,firstname),[(aid,name)]]
-        albums=getUsersAlbums(user_id) #(aid, name) tuple
+        albums=getUsersAlbums(owner_id) #(aid, name) tuple
         album_data = []
         for album in albums:
             aid = album[0]
@@ -188,5 +188,5 @@ def getAllPhotos(uid):
             if len(album_photos)>0:
                 album_data.append({'aid':aid, 'album_name':aname,'photos':album_photos})
         if len(album_data)>0:
-            user_photos.append({'user_id':user_id, 'user_name':user_name, 'albums':album_data})
+            user_photos.append({'owner_id':owner_id, 'owner_name':owner_name, 'albums':album_data})
     return user_photos

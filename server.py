@@ -16,7 +16,7 @@ from flask import Flask, request, render_template, g, redirect, Response
 import flask_login
 from datetime import datetime
 
-from backend import user_resource, photo_resource, album_resource, general_resource
+from backend import user_resource, photo_resource, album_resource, general_resource, tag_resource
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -374,6 +374,18 @@ def browse():
         return general_resource.get_browse(uid)
     else:
         return general_resource.post_browse(uid, request)
+
+@app.route("/onetag", methods=['GET','POST'])
+#@flask_login.login_required
+def onetag():
+    if flask_login.current_user.is_authenticated == False:
+        uid = getUserIdFromEmail("anonymous@bu.edu")
+    else:
+        uid = getUserIdFromEmail(flask_login.current_user.id)
+    if request.method =='GET':
+        return tag_resource.get_onetag(uid, request)
+    else:
+        return tag_resource.post_onetag(uid)
 
 
 if __name__ == "__main__":
