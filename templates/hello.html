@@ -1,73 +1,166 @@
 <!-- author ben lawson (balawson@bu.edu) -->
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Photoshare</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.gstatic.com">
-        <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
-        <style>
-            *{box-sizing: border-box;
-                font-family: 'Roboto Mono', monospace;}
+<head>
+    <title>Photoshare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <style>
+        *{box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;}
+        a{
+            font-size: calc(5px + 0.8vw);
+            color: #b75036;
+        }
+        a:hover {
+            color: #deb344;
+            text-decoration: none;
+        }
+        nav li{
+            margin: 0.5vh 1.5em;
+            padding: 0.5vh 0;
+            box-sizing: border-box;
+            width: 80%;
+            font-size: 15px;
+            display: inline;
+            text-align: center;
+        }
+        nav ul {
+            padding-inline-start: 0;
+            margin-block-start: 0;
+            margin:auto;
+            margin: 3vh 1vw;
+            text-align:center;
+		    box-sizing:border-box;
+            border-bottom: solid gray(1) 5px;
+        }
+        nav a {
+            color: #5aa7e8;
+            font-size: calc(4px + 1vw);
+        }
+        nav a:hover {
+            color: #81e0e0;
+            text-decoration: none;
+        }
+        nav{
+            border-bottom: solid gray(1) 5px;
 
-            nav li{
-                margin: 0.5vh 1em;
-                padding: 0.5vh 0;
-                box-sizing: border-box;
-                width: 80%;
-                font-size: 15px;
-            }
-            nav ul {
-            }
-            a {
-                color: #5aa7e8;
-                font-size: calc(5px + 1vw);
-            }
-            a:hover {
-                color: #81e0e0;
-                text-decoration: none;
-            }
-        </style>
-		<link rel="stylesheet" type="text/css" href="main.css" />
-	</head>
-    <body>
-    <header>
-        {% if message %}
-            <h3 style="text-align: center; color:red;">{{message}}!</h3>
-            <h3> Go to <a href='/profile'>profile?</a></h3>
-        {% else %}
-            <h3>You should <a href='/login'>login!</a></h3>
+        }
+        img.photos{
+            width:80%;
+            max-width: 100%;
+            height:auto;
+            box-sizing: border-box;
+        }
+        .photos{
+            border: double 6px darkred;
+            padding: 2vh 3vw;
+            margin:1vh 0;
+        }
+        .user {
+            border: dashed 8px midnightblue;
+            padding: 2vh 3vw;
+            margin: 10vh 2vw;
+        }
+        .album{
+            border-top: dotted 6px darkslategrey;
+            border-bottom: dotted 6px darkslategrey;
+        }
+        h3.caption , h3.tag, h3.album{border-bottom: dashed dimgrey 2px;
+            margin: 0;
+        }
+        h3.caption, h3.photos {
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+<header>
+    {% if message %}
+        <h3 style="text-align: center; color:red;">{{ message }}!</h3>
+    {% else %}
+        <h3>You should <a href='/login'>login!</a></h3>
+    {% endif %}
+    {% if name %}
+        <h1>Hello {{ name }}!</h1>
+    {% endif %}
+
+</header>
+<div id="container">
+
+    <nav>
+        <ul>
+            {% if message=='Logged out' %}
+                <li><a href='/login'>Login</a></li>
+            {% else %}
+                <li><a href='/friend'>Add a new friend</a></li>
+                <li><a href='/album'>Go to Albums</a></li>
+                <li><a href='/search'>Go to search</a></li>
+                <li><a href='/browse'>Browse photos</a></li>
+                <li><a href='/youmaylike'>Photos you may also like</a></li>
+                <li><a href='/logout'>Logout</a></li>
+            {% endif %}
+            <li><a href='/'>Home</a></li>
+        </ul>
+    </nav>
+<hr>
+<h3>Here are some most popular photos!</h3>
+    <div id="popluarphotos">
+{% for photo in photos %}
+    <div class="photos">
+    <li><h3 class="caption">Caption: {{photo['caption']}}</h3></li>
+    <li><h3 class="tag" style="display: inline;">Tags:
+                {% for tag in photo['tags'] %}
+                    <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
+                {% endfor %}
+    </h3></li>
+        <br>
+            <img src=' {{ photo['img_data'] }}' style="max-width: 100%; height: auto;"/></li>
+            <h4>Uploaded by: {{ photo['owner_name'] }}</h4>
+            <form method="post" enctype="multipart/form-data" action="/like">
+                <input type="hidden" name="distinction" value=2>
+                <input type="hidden" name="description" value={{ description }}>
+                <input type="hidden" name="aid" value={{ photo['aid'] }}>
+                <input type="hidden" name="pid" value={{ photo['pid'] }}>
+                <input type="submit" value="Like ({{ photo['numlikes'] }})" size="10" />
+            </form>
+            <h3>Comments:</h3>
+            <table border="2" cellpadding="5" width="100%">
+                        <tr>
+                            <td><b> Commenter </b></td>
+                            <td><b> Comment </b></td>
+                            <td><b> Date </b></td>
+                        </tr>
+
+            {% for comment in photo['comments'] %}
+                        <tr>
+                            <td>{{ comment['user_name'] }}</td>
+                            <td>{{ comment['text'] }}</td>
+                            <td>{{ comment['date'] }}</td>
+                        </tr>
+            {% endfor %}
+            </table>
+            <br>
+        {% if uid !=  photo['owner_uid']  %}
+            <form method="post" enctype="multipart/form-data" action="/onetag?description={{ description }}">
+                <input type="hidden" name="pid" value={{ photo['pid'] }}>
+                <label for="comment">Leave your comment:</label>
+                <input type="text" name="comment" size="100" />
+                <input type="submit" value="Send" />
+            </form>
         {% endif %}
-        {% if name %}
-          <h1>Hello {{ name }}!</h1>
-        {% endif %}
-
-    </header>
-    <div id="container">
-
-        <nav>
-            <ul>
-                {% if message=='Logged out' %}
-                    <li><a href='/login'>Login</a></li>
-                {% else %}
-                    <li><a href='/friend'>Add a new friend</a> </li>
-                    <li><a href='/album'>Go to Albums</a></li>
-                    <li><a href='/search'>Go to search</a></li>
-                    <li><a href='/browse'>Browse photos</a></li>
-                    <li><a href='/youmaylike'>Photos you may also like</a></li>
-                    <li><a href='/logout'>Logout</a></li>
-                {% endif %}
-                <li><a href='/'>Home</a></li>
-            </ul>
-        </nav>
+        </div>
+    <br>
+{% endfor %}
 
     </div>
 
+</div>
 
-        <br>
 
-        <hr>
+<br>
 
-    </body>
+<hr>
+
+</body>
 </html>

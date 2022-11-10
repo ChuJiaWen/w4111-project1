@@ -70,6 +70,15 @@
     </ul>
 </nav>
 <hr>
+    <h2>This is the list of tags ordered by popularity. (From left to right in descending order) </h2>
+    <ol style="list-style-type: none;">
+        {% for tag in taglist %}
+        <li style="display: inline; margin: 2vh 1vw;">
+            <a href="/onetag?description={{ tag[0] }}">#{{ tag[0] }}</a>
+        </li>
+        {% endfor %}
+    </ol>
+<hr>
 <h1>Here are photos that associate with tag #{{ description }}</h1>
 
 {% if photos ==[] %}
