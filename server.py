@@ -350,7 +350,7 @@ def onealbum():
     if request.method == 'POST':
         return album_resource.post_onealbum(uid, request)
     else:
-        return album_resource.get_onealbum(uid, args_data=request.args)
+        return album_resource.get_onealbum(uid, aid=request.args['aid'])
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -382,10 +382,11 @@ def onetag():
         uid = getUserIdFromEmail("anonymous@bu.edu")
     else:
         uid = getUserIdFromEmail(flask_login.current_user.id)
+    tag_name = request.args.get('description')
     if request.method =='GET':
-        return tag_resource.get_onetag(uid, request)
+        return tag_resource.get_onetag(uid, tag_name)
     else:
-        return tag_resource.post_onetag(uid)
+        return tag_resource.post_onetag(uid, tag_name)
 
 
 if __name__ == "__main__":

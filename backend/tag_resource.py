@@ -16,8 +16,7 @@ def getPhotoByTag(tag_name):
     result = g.conn.execute("SELECT pid FROM Associates WHERE tag_name = '{0}'".format(tag_name)).fetchall()
     return result
 
-def get_onetag(uid,request):
-    tag_name = request.args.get('description')
+def getAllPhotoInfo(tag_name):
     photolist = []
     photo_id = getPhotoByTag(tag_name)
     for photo in photo_id:
@@ -29,39 +28,26 @@ def get_onetag(uid,request):
             photo_comment.append({'text': comment[0], 'date': comment[1], 'user_name': comment[3]})
         tags = photo_resource.getPhotoTag(pid)  # (tag_name,pid) tuple
         numlikes = photo_resource.getNumLikes(pid)
-        (owner_uid,aid) = photo_resource.getPhotoOwner_Album(pid)
+        (owner_uid, aid) = photo_resource.getPhotoOwner_Album(pid)
         owner_name = user_resource.getUsersName(owner_uid)
         photolist.append(
             {'pid': pid, 'caption': photo_data[1], 'img_data': photo_data[2], 'tags': tags, 'numlikes': numlikes,
-             'comments': photo_comment, 'owner_id':owner_uid,'owner_name':owner_name, 'aid':aid})
+             'comments': photo_comment, 'owner_id': owner_uid, 'owner_name': owner_name, 'aid': aid})
+    return photolist
 
-    return render_template('/onetag.html', description=tag_name, uid=uid, photos=photolist)
+def get_onetag(uid,tag_name):
+    photolist = getAllPhotoInfo(tag_name)
+    taglist = getTopTags()
+    return render_template('/onetag.html', description=tag_name, uid=uid, photos=photolist, taglist=taglist)
 
-def post_onetag(uid):
-    cursor = conn.cursor()
+def post_onetag(uid,tag_name):
     comment = request.form.get('comment')
     date = datetime.today().strftime('%Y-%m-%d,%H:%M:%S')
-    uname = getUsersName(uid)
     pid = request.form.get('pid')
-    aid = getAlbumId(pid)
-    cursor.execute(
-        '''INSERT INTO  Comments_Leaves_Has (comment,date, pid, aid,uid,uname) VALUES (%s, %s,%s,%s, %s,%s )''',
-        (comment, date, pid, aid, uid, uname))
-    newcontribution = getUserContribution(uid) + 1
-    cursor.execute("UPDATE Users SET contribution='{1}'  WHERE uid = '{0}'".format(uid, newcontribution))
-    conn.commit()
-    description = request.args.get('description')
-    photolist = []
-    photos = getPhotoByTag(description)
-    for photo in photos:
-        pid = photo[1]
-        if pid == -1:
-            continue
-        owneruid = photo[2]
-        ownername = getUsersName(owneruid)
-        photodata = getPhoto(pid)
-        numlikes = getNumLikes(pid)
-        comment = getPhotoComment(pid)
-        tags = getPhotoTag(pid)
-        photolist.append([photodata, numlikes, comment, tags, ownername, aid])
-    return render_template('/onetag.html', description=description, uid=uid, photos=photolist)
+    g.conn.execute(
+        '''INSERT INTO  Has_Comments (text, date, pid) VALUES (%s, %s, %s)''',
+        (comment, date, pid))
+    cid = g.conn.execute("SELECT cid FROM Has_Comments ORDER BY cid DESC LIMIT 1;").fetchone()[0]
+    g.conn.execute('''INSERT INTO Commented (cid,pid, uid, date) VALUES (%s, %s, %s, %s )''',
+                   (cid, pid, uid, date))
+    return get_onetag(uid, tag_name)

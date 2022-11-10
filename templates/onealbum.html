@@ -71,7 +71,7 @@
     </nav>
     <hr>
 
-    <h1>Here are photos in Album "{{ name }}"</h1>
+    <h1>Here are photos in Album "{{ name }}" of User "{{ ownername }}"</h1>
         <ul>
             {% if uid == owneruid %}
                 <li><a href="/upload?aid={{ aid }}">Upload a photo to this album</a> </li>

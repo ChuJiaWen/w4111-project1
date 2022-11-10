@@ -8,11 +8,8 @@ def get_browse(uid):
     return render_template('browse.html', uid=uid, user_photos=photos, taglist=taglist)
 
 def post_browse(uid, request):
-    aid = request.form.get('aid')
-    owneruid = album_resource.getAlbumOwner(aid)
     comment = request.form.get('comment')
     date = datetime.today().strftime('%Y-%m-%d,%H:%M:%S')
-    uname = user_resource.getUsersName(uid)
     pid = request.form.get('pid')
     g.conn.execute(
         '''INSERT INTO  Has_Comments (text, date, pid) VALUES (%s, %s, %s)''',

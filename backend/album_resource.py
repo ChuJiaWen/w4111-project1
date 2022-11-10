@@ -1,5 +1,6 @@
-from flask import request, render_template, g
-from backend import user_resource, photo_resource
+from flask import Flask, request, render_template, g, redirect, Response, url_for
+from backend import user_resource, photo_resource, tag_resource, general_resource
+from datetime import datetime
 
 
 def getAlbumName(aid):
@@ -43,9 +44,9 @@ def post_create_album(uid, form_data):
         string = "Album " + oldname + " renamed to " + newname + "."
         return render_template('album.html', album=user_resource.getUsersAlbums(uid), message=string)
 
-def get_onealbum(uid, args_data):
-    aid = args_data.get('aid')
+def get_onealbum(uid, aid):
     owneruid = getAlbumOwner(aid)
+    ownername= user_resource.getUsersName(owneruid)
     photo_id = getAlbumPhotos(aid)
     photolist = []
     for pid in photo_id:
@@ -58,35 +59,23 @@ def get_onealbum(uid, args_data):
         for comment in comments:
             photo_comment.append({'text': comment[0], 'date':comment[1],'user_name':comment[3]})
         photolist.append([photo, numlikes, photo_comment, tags])
-    # return render_template('onealbum.html', uid=uid, owneruid=owneruid[0], name=getAlbumName(aid), aid=aid,
-    #                        comments=getAlbumComments(aid), photos=photolist, base64=base64)
-    return render_template('onealbum.html', uid=uid, owneruid=owneruid, name=getAlbumName(aid), aid=aid, photos=photolist)
+    return render_template('onealbum.html', uid=uid, owneruid=owneruid, ownername=ownername,name=getAlbumName(aid), aid=aid, photos=photolist)
 
 def post_onealbum(uid, request):
     aid = request.args.get('aid')
     pid = request.form.get('pid')
     distinction = request.form.get('distinction')
-    owneruid = getAlbumOwner(aid)
 
     if distinction == '0':
-        print("Inside album_resource/post_onealbum, distinction==0")
-        # comment = request.form.get('comment')
-        # date = datetime.today().strftime('%Y-%m-%d,%H:%M:%S')
-        # uname = getUsersName(uid)
-        # g.conn.execute(
-        #     '''INSERT INTO  Comments_Leaves_Has (comment,date, pid, aid,uid,uname) VALUES (%s, %s,%s,%s, %s,%s )''',
-        #     (comment, date, pid, aid, uid, uname))
+        comment = request.form.get('comment')
+        date = datetime.today().strftime('%Y-%m-%d,%H:%M:%S')
+        pid = request.form.get('pid')
+        g.conn.execute(
+            '''INSERT INTO  Has_Comments (text, date, pid) VALUES (%s, %s, %s)''',
+            (comment, date, pid))
+        cid = g.conn.execute("SELECT cid FROM Has_Comments ORDER BY cid DESC LIMIT 1;").fetchone()[0]
+        g.conn.execute('''INSERT INTO Commented (cid,pid, uid, date) VALUES (%s, %s, %s, %s )''',
+                       (cid, pid, uid, date))
     else:
         g.conn.execute("DELETE FROM Photos WHERE pid='{0}'".format(pid))
-    photo_id = getAlbumPhotos(aid)
-    photolist = []
-    for pid in photo_id:
-        pid = pid[0]
-        photo = photo_resource.getPhoto(pid)
-        print("PHOTO_url:",photo[2])
-        numlikes = photo_resource.getNumLikes(pid)
-        tags = photo_resource.getPhotoTag(pid)
-        comments = photo_resource.getPhotoComment(pid)
-        photolist.append([photo, numlikes, tags,comments])
-    return render_template('onealbum.html', uid=uid, owneruid=owneruid[0], name=getAlbumName(aid), aid=aid,
-                           photos=photolist)
+    return get_onealbum(uid, aid)
