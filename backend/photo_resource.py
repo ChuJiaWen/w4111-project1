@@ -13,7 +13,7 @@ def getPhotoOwner(pid):
     return result[0]
 
 def getPhotoComment(pid):
-    result = g.conn.execute("SELECT text, Has_Comments.date, Has_Comments.pid,Users.first_name FROM Has_Comments,Commented, Users \
+    result = g.conn.execute("SELECT text, Has_Comments.date, Has_Comments.pid, Users.first_name FROM Has_Comments,Commented, Users \
     WHERE Has_Comments.pid ='{0}' AND Commented.pid = '{0}' AND Has_Comments.cid=Commented.cid AND Users.uid=Commented.uid".format(pid)).fetchall()
     print("Inside photo_resource/getPhotoComment(pid), this is comments retrived:", result)
     return result

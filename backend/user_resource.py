@@ -181,10 +181,10 @@ def getAllPhotos(uid):
                 comments = photo_resource.getPhotoComment(pid) #(text, date, pid, uname)tuple
                 photo_comment = []
                 for comment in comments:
-                    photo_comment.append({'text': comment[0], 'date':comment[1],'user_name':comment[2]})
+                    photo_comment.append({'text': comment[0], 'date':comment[1],'user_name':comment[3]})
                 tags = photo_resource.getPhotoTag(pid) #(tag_name,pid) tuple
                 numlikes = photo_resource.getNumLikes(pid)
-                album_photos.append({'pid':pid, 'caption':photo_data[1],'img_data':photo_data[2],'tags':tags, 'numlkes':numlikes})
+                album_photos.append({'pid':pid, 'caption':photo_data[1],'img_data':photo_data[2],'tags':tags, 'numlikes':numlikes,'comments':photo_comment})
             if len(album_photos)>0:
                 album_data.append({'aid':aid, 'album_name':aname,'photos':album_photos})
         if len(album_data)>0:
