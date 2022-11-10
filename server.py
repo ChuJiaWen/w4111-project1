@@ -16,7 +16,7 @@ from flask import Flask, request, render_template, g, redirect, Response
 import flask_login
 from datetime import datetime
 
-from backend import user_resource, photo_resource, album_resource, general_resource
+from backend import user_resource, photo_resource, album_resource, general_resource, tag_resource
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -373,21 +373,19 @@ def browse():
     if request.method=='GET':
         return general_resource.get_browse(uid)
     else:
-        cursor = conn.cursor()
-        aid = request.form.get('aid')
-        owneruid = getAlbumOwner(aid)
-        comment = request.form.get('comment')
-        date = datetime.today().strftime('%Y-%m-%d,%H:%M:%S')
-        uname = getUsersName(uid)
-        pid=request.form.get('pid')
-        cursor.execute(
-            '''INSERT INTO  Comments_Leaves_Has (comment,date, pid, aid,uid,uname) VALUES (%s, %s,%s,%s, %s,%s )''',
-            (comment, date, pid, aid, uid, uname))
-        newcontribution = getUserContribution(uid) + 1
-        cursor.execute("UPDATE Users SET contribution='{1}'  WHERE uid = '{0}'".format(uid,newcontribution))
-        conn.commit()
-        photos = getAllPhotos()
-        return render_template('browse.html', uid=uid, users=photos, base64=base64)
+        return general_resource.post_browse(uid, request)
+
+@app.route("/onetag", methods=['GET','POST'])
+#@flask_login.login_required
+def onetag():
+    if flask_login.current_user.is_authenticated == False:
+        uid = getUserIdFromEmail("anonymous@bu.edu")
+    else:
+        uid = getUserIdFromEmail(flask_login.current_user.id)
+    if request.method =='GET':
+        return tag_resource.get_onetag(uid, request)
+    else:
+        return tag_resource.post_onetag(uid)
 
 
 if __name__ == "__main__":

@@ -84,7 +84,7 @@
             <div class="photos">
             <li><h3 class="caption">Caption: {{photo[0][1]}}</h3></li>
             <li><h3 class="tag" style="display: inline;">Tags:
-                {% for tag in photo[2] %}
+                {% for tag in photo[3] %}
                     <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
                 {% endfor %}
             </h3></li>
@@ -111,14 +111,12 @@
                                 <td><b> Date </b></td>
                             </tr>
 
-                {% for comment in comments %}
-                    {% if comment[2] == photo[0][1] %}
-                            <tr>
-                                <td>{{ comment[5] }}</td>
-                                <td>{{ comment[0] }}</td>
-                                <td>{{ comment[1] }}</td>
-                            </tr>
-                    {% endif %}
+                {% for comment in photo[2] %}
+                    <tr>
+                        <td>{{ comment['user_name'] }}</td>
+                        <td>{{ comment['text'] }}</td>
+                        <td>{{ comment['date'] }}</td>
+                    </tr>
                 {% endfor %}
                 </table>
                 <br>
@@ -137,7 +135,7 @@
             {% endfor %}
         </ul>
 {%else%}
-    <p>You have not upload any photos in Album "{{name}}" yet.</p>
+    <p>No photos in Album "{{name}}" yet.</p>
 {% endif %}
 
 

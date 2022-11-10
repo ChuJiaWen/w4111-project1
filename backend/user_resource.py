@@ -2,6 +2,7 @@ import json
 
 import flask_login
 from flask import Flask, request, render_template, g, redirect, Response, url_for
+from backend import photo_resource, album_resource, tag_resource
 
 
 class User(flask_login.UserMixin):
@@ -147,40 +148,45 @@ def getAllPhotos(uid):
     """uid = current logged-in user; user_id = accounts in database"""
     uidlist = g.conn.execute("SELECT DISTINCT uid FROM Users").fetchall()
     users=[]
-    photos = []
+    user_photos=[]
     for user in uidlist:
         #get photos of an account if it satisfies one of the condition
-        user_id=user[0]
-        if not is_private(user_id):#if account is public
-            users.append([user_id,getUsersName(user_id)])
-        elif is_private(user_id) and is_friend(uid,user_id): #if account is private and user is account's friend
-            users.append([user_id, getUsersName(user_id)])
-    print("This is users inside user_resource/getAllPhotos:", users)
+        owner_id=user[0]
+        if not is_private(owner_id):#if account is public
+            users.append([owner_id,getUsersName(owner_id)])
+        elif is_private(owner_id) and is_friend(uid,owner_id): #if account is private and user is account's friend
+            users.append([owner_id, getUsersName(owner_id)])
+    # print("This is users inside user_resource/getAllPhotos:", users)
     """
-    user1 = '{ "user_name": user_name,
-                "albums" : { "aid":aid, "album_name": aname, "photo": {"pid": pid, "caption":caption, "img_data":img_data, 
+    user1 = '{  'owner_id' : owner_id,
+                "owner_name": owner_name,
+                "albums" : { "aid":aid, "album_name": aname, "photos": {"pid": pid, "caption":caption, "img_data":img_data, 
                                                                         "tags": tags(list of tags), "numlikes": numlikes, 
-                                                                        "comments": {"cid": cid, "text":comment_text,
+                                                                        "comments": {"text":comment_text, "date":datae
                                                                          "user_name":comment_uname}}}
     }'
     """
-    for (user_id, user_name) in users:
+    for (owner_id, owner_name) in users:
         #[(uid,firstname),[(aid,name)]]
-        albums=getUsersAlbums(user_id)
+        albums=getUsersAlbums(owner_id) #(aid, name) tuple
+        album_data = []
         for album in albums:
-            aid=album[0]
-            aname =albums[z][1]
-            users[j].append([])
-            users[j][2].append([aid,aname,[],[]])
-            comments = getAlbumComments(aid)
-            for i in range(0,len(comments)):
-                users[j][2][z][3].append(comments[i])
-            photos=getAlbumPhotos(aid)
-            for i in range(0,len(photos)):
-                pid=photos[i][1]
-                if pid == -1:
-                    continue
-                numlikes = getNumLikes(photos[i][1])
-                tags = getPhotoTag(pid)
-                users[j][2][z][2].append([photos[i], numlikes,tags])
-    return users
+            aid = album[0]
+            aname =album[1]
+            photo_id=album_resource.getAlbumPhotos(aid)
+            album_photos=[]
+            for photo in photo_id:
+                pid = photo[0]
+                photo_data = photo_resource.getPhoto(pid) #(pid, caption, img_data) tuple
+                comments = photo_resource.getPhotoComment(pid) #(text, date, pid, uname)tuple
+                photo_comment = []
+                for comment in comments:
+                    photo_comment.append({'text': comment[0], 'date':comment[1],'user_name':comment[3]})
+                tags = photo_resource.getPhotoTag(pid) #(tag_name,pid) tuple
+                numlikes = photo_resource.getNumLikes(pid)
+                album_photos.append({'pid':pid, 'caption':photo_data[1],'img_data':photo_data[2],'tags':tags, 'numlikes':numlikes,'comments':photo_comment})
+            if len(album_photos)>0:
+                album_data.append({'aid':aid, 'album_name':aname,'photos':album_photos})
+        if len(album_data)>0:
+            user_photos.append({'owner_id':owner_id, 'owner_name':owner_name, 'albums':album_data})
+    return user_photos

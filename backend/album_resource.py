@@ -8,7 +8,7 @@ def getAlbumName(aid):
 
 def getAlbumOwner(aid):
     result = g.conn.execute("SELECT uid FROM Albums WHERE aid ='{0}'".format(aid)).fetchone()
-    return result
+    return result[0]
 
 def getAlbumPhotos(aid):
     # print(g.conn.execute("SELECT pid FROM Contains WHERE aid ='{0}'".format(aid)).fetchall())
@@ -53,10 +53,14 @@ def get_onealbum(uid, args_data):
         photo = photo_resource.getPhoto(pid)
         numlikes = photo_resource.getNumLikes(pid)
         tags = photo_resource.getPhotoTag(pid)
-        photolist.append([photo, numlikes, tags])
+        comments = photo_resource.getPhotoComment(pid) #(text, date, pid, uname)tuple
+        photo_comment = []
+        for comment in comments:
+            photo_comment.append({'text': comment[0], 'date':comment[1],'user_name':comment[3]})
+        photolist.append([photo, numlikes, photo_comment, tags])
     # return render_template('onealbum.html', uid=uid, owneruid=owneruid[0], name=getAlbumName(aid), aid=aid,
     #                        comments=getAlbumComments(aid), photos=photolist, base64=base64)
-    return render_template('onealbum.html', uid=uid, owneruid=owneruid[0], name=getAlbumName(aid), aid=aid, photos=photolist)
+    return render_template('onealbum.html', uid=uid, owneruid=owneruid, name=getAlbumName(aid), aid=aid, photos=photolist)
 
 def post_onealbum(uid, request):
     aid = request.args.get('aid')

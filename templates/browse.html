@@ -96,28 +96,28 @@
 
 
 
-    {% for user in users %}
+    {% for user in user_photos %}
         <div class="user">
-        <h2>User: {{ user[1] }}</h2>
-       {%  for album in  user[2]  %}
+        <h2>User: {{ user['owner_name'] }}</h2>
+       {%  for album in  user['albums']  %}
            <div class="album">
-           <h3><a href="/onealbum?aid={{ album[0] }}">Album: {{ album[1] }}</a></h3>
+           <h3><a href="/onealbum?aid={{ album['aid'] }}">Album: {{ album['album_name'] }}</a></h3>
            <ul>
-           {% for photo in album[2] %}
+           {% for photo in album['photos'] %}
                <div class="photos">
-               <li><h3 class="caption">Caption: {{photo[0][2]}}</h3></li>
+               <li><h3 class="caption">Caption: {{photo['caption']}}</h3></li>
                <li><h3 class="tag" style="display: inline;">Tags:
-                {% for tag in photo[2] %}
+                {% for tag in photo['tags'] %}
                     <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
                 {% endfor %}
             </h3></li>
                 <br>
-                <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}' style="max-width: 100%; height: auto;"/></li>
+                <img src=' {{ photo['img_data'] }}' style="max-width: 100%; height: auto;"/></li>
                <form method="post" enctype="multipart/form-data" action='/like'>
                <input type="hidden" name="distinction" value=0>
-               <input type="hidden" name="aid" value={{ photo[0][3] }}>
-                <input type="hidden" name="pid" value={{ photo[0][1] }}>
-                <input type="submit" value="Like ({{ photo[1] }})" size="20" />
+               <input type="hidden" name="aid" value={{ album['aid'] }}>
+                <input type="hidden" name="pid" value={{ photo['pid'] }}>
+                <input type="submit" value="Like ({{ photo['numlikes'] }})" size="20" />
             </form>
                <h3>Comments:</h3>
             <table border="2" cellpadding="5" width="100%">
@@ -126,21 +126,19 @@
                             <td><b> Comment </b></td>
                             <td><b> Date </b></td>
                         </tr>
-            {% for comment in album[3] %}
-                {% if comment[2] == photo[0][1] %}
-                        <tr>
-                            <td>{{ comment[5] }}</td>
-                            <td>{{ comment[0] }}</td>
-                            <td>{{ comment[1] }}</td>
-                        </tr>
-                {% endif %}
-            {% endfor %}
+                {% for comment in photo['comments'] %}
+                    <tr>
+                        <td>{{ comment['user_name'] }}</td>
+                        <td>{{ comment['text'] }}</td>
+                        <td>{{ comment['date'] }}</td>
+                    </tr>
+                {% endfor %}
             </table>
             <br>
-                {% if uid !=  user[0]  %}
+                {% if uid !=  user['owner_id']  %}
                     <form method="post" enctype="multipart/form-data" action="/browse">
-                        <input type="hidden" name="aid" value={{ album[0] }}>
-                        <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                        <input type="hidden" name="aid" value={{ album['aid'] }}>
+                        <input type="hidden" name="pid" value={{ photo['pid'] }}>
                         <label for="comment">Leave your comment:</label>
                         <input type="text" name="comment" size="100" />
                         <input type="submit" value="Send" />
