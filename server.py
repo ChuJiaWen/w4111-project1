@@ -212,14 +212,6 @@ def index():
     #   names.append(result['name'])  # can also be accessed using result[0]
     # cursor.close()
 
-    cursor = g.conn.execute("SELECT * FROM users")
-    names = []
-    for result in cursor:
-        names.append(result)  # can also be accessed using result[0]
-    cursor.close()
-
-    print(names)
-
     # Flask uses Jinja templates, which is an extension to HTML where you can
     # pass data to a template and dynamically generate HTML based on the data
     # (you can think of it as simple PHP)
@@ -228,11 +220,12 @@ def index():
     # You can see an example template in templates/index.html
     #
     if flask_login.current_user.is_authenticated == False:
-        return render_template("hello.html")
+        uid = getUserIdFromEmail("anonymous@columbia.edu")
     else:
         uid = getUserIdFromEmail(flask_login.current_user.id)
-        return render_template("hello.html", name=user_resource.getUsersName(uid), message="Here's your profile")
 
+    photolist = general_resource.getPoplarPhotoInfo()
+    return render_template("hello.html", name=user_resource.getUsersName(uid), message="Here's your profile", photos=photolist)
 
 #
 # This is an example of a different path.  You can see it at:
