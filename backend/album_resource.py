@@ -8,7 +8,7 @@ def getAlbumName(aid):
 
 def getAlbumOwner(aid):
     result = g.conn.execute("SELECT uid FROM Albums WHERE aid ='{0}'".format(aid)).fetchone()
-    return result
+    return result[0]
 
 def getAlbumPhotos(aid):
     # print(g.conn.execute("SELECT pid FROM Contains WHERE aid ='{0}'".format(aid)).fetchall())

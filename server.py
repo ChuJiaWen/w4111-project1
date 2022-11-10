@@ -373,21 +373,7 @@ def browse():
     if request.method=='GET':
         return general_resource.get_browse(uid)
     else:
-        cursor = conn.cursor()
-        aid = request.form.get('aid')
-        owneruid = getAlbumOwner(aid)
-        comment = request.form.get('comment')
-        date = datetime.today().strftime('%Y-%m-%d,%H:%M:%S')
-        uname = getUsersName(uid)
-        pid=request.form.get('pid')
-        cursor.execute(
-            '''INSERT INTO  Comments_Leaves_Has (comment,date, pid, aid,uid,uname) VALUES (%s, %s,%s,%s, %s,%s )''',
-            (comment, date, pid, aid, uid, uname))
-        newcontribution = getUserContribution(uid) + 1
-        cursor.execute("UPDATE Users SET contribution='{1}'  WHERE uid = '{0}'".format(uid,newcontribution))
-        conn.commit()
-        photos = getAllPhotos()
-        return render_template('browse.html', uid=uid, users=photos, base64=base64)
+        return general_resource.post_browse(uid, request)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,11 @@ from backend import album_resource,user_resource
 from datetime import datetime
 
 def getAllTags():
-    result = g.conn.execute("SELECT tag_name as count FROM Tags ORDER BY tag_name").fetchall()
+    result = g.conn.execute("SELECT tag_name FROM Tags ORDER BY tag_name").fetchall()
+    return result  # NOTE list of tuples, [(tag_name,), ...]
+
+def getTopTags():
+    result = g.conn.execute("SELECT Tags.tag_name FROM Tags, Associates WHERE Tags.tag_name=Associates.tag_name GROUP BY Tags.tag_name ORDER BY COUNT(*) DESC").fetchall()
     return result  # NOTE list of tuples, [(tag_name,), ...]
 
 # def getTopMyTags(uid):
