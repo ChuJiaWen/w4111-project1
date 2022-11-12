@@ -103,14 +103,14 @@
     <ul>
         {% for photo in photos %}
             <div class="photos">
-                <li><h3 class="caption">Caption: {{ photo[0][2] }}</h3></li>
+                <li><h3 class="caption">Caption: {{ photo[0][1] }}</h3></li>
                 <li><h3 class="tag" style="display: inline;border-bottom: dashed dimgrey 2px;">Tags:
                     {% for tag in photo[3] %}
                         <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
                     {% endfor %}
                 </h3></li>
                 <br>
-                <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0][0]).decode("ascii") }}'
+                <img src={{ photo[0][2] }}
                      style="max-width: 100%; height: auto;"/>
                 <h4>Uploaded by: {{ photo[4] }}</h4>
                 <form method="post" enctype="multipart/form-data" action="/like">
@@ -129,7 +129,7 @@
 
                     {% for comment in photo[2] %}
                         <tr>
-                            <td>{{ comment[5] }}</td>
+                            <td>{{ comment[3] }}</td>
                             <td>{{ comment[0] }}</td>
                             <td>{{ comment[1] }}</td>
                         </tr>

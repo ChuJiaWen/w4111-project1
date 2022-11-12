@@ -220,12 +220,12 @@ def index():
     # You can see an example template in templates/index.html
     #
     if flask_login.current_user.is_authenticated == False:
-        uid = getUserIdFromEmail("anonymous@columbia.edu")
+        return render_template('register.html', supress=True)
     else:
         uid = getUserIdFromEmail(flask_login.current_user.id)
 
-    photolist = general_resource.getPoplarPhotoInfo()
-    return render_template("hello.html", name=user_resource.getUsersName(uid), message="Here's your profile", photos=photolist)
+        photolist = general_resource.getPoplarPhotoInfo()
+        return render_template("hello.html", name=user_resource.getUsersName(uid), message="Here's your profile", photos=photolist)
 
 #
 # This is an example of a different path.  You can see it at:
@@ -243,7 +243,7 @@ def getUserList():
 
 def getUserIdFromEmail(email):
     result = g.conn.execute("SELECT uid  FROM Users WHERE email = '{0}'".format(email)).fetchone()
-    print("Getting uid:", result, result[0])
+    # print("Getting uid:", result, result[0])
     return result[0]
 
 
@@ -356,12 +356,12 @@ def upload_file():
         return photo_resource.post_upload_photo(uid, request)
 
 @app.route("/browse", methods=['GET','POST'])
-#@flask_login.login_required
+@flask_login.login_required
 def browse():
-    if flask_login.current_user.is_authenticated == False:
-        uid = getUserIdFromEmail("anonymous@columbia.edu")
-    else:
-        uid = getUserIdFromEmail(flask_login.current_user.id)
+    # if flask_login.current_user.is_authenticated == False:
+    #     uid = getUserIdFromEmail("anonymous@columbia.edu")
+    # else:
+    uid = getUserIdFromEmail(flask_login.current_user.id)
 
     if request.method=='GET':
         return general_resource.get_browse(uid)
@@ -369,18 +369,97 @@ def browse():
         return general_resource.post_browse(uid, request)
 
 @app.route("/onetag", methods=['GET','POST'])
-#@flask_login.login_required
+@flask_login.login_required
 def onetag():
-    if flask_login.current_user.is_authenticated == False:
-        uid = getUserIdFromEmail("anonymous@bu.edu")
-    else:
-        uid = getUserIdFromEmail(flask_login.current_user.id)
+    # if flask_login.current_user.is_authenticated == False:
+    #     uid = getUserIdFromEmail("anonymous@bu.edu")
+    # else:
+    uid = getUserIdFromEmail(flask_login.current_user.id)
     tag_name = request.args.get('description')
     if request.method =='GET':
         return tag_resource.get_onetag(uid, tag_name)
     else:
         return tag_resource.post_onetag(uid, tag_name)
 
+
+@app.route("/like", methods=['GET','POST'])
+@flask_login.login_required
+def like():
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+    distinction = request.form.get('distinction')
+    description = request.form.get('description')
+    aid = request.form.get('aid')
+    pid = request.form.get('pid')
+    uname = user_resource.getUsersName(uid)
+    DOF = datetime.today().strftime('%Y-%m-%d')
+    count = g.conn.execute("SELECT * FROM Likes WHERE uid ='{0}' AND pid = '{1}'".format(uid, pid)).rowcount
+    if count == 0:
+        message = True
+        g.conn.execute('''INSERT INTO  Likes (pid,uid,date) VALUES (%s, %s, %s)''', (pid, uid,DOF))
+    else:
+        message = False
+
+    numlikes = photo_resource.getNumLikes(pid)
+    likedusers = g.conn.execute("SELECT u.first_name FROM Likes l,Users u WHERE l.uid=u.uid and l.pid = '{0}'".format(pid)).fetchall()
+    return render_template('like.html', message=message, aid=aid, albumname=album_resource.getAlbumName(aid),likedusers=likedusers, numlikes=numlikes,
+                          photo=photo_resource.getPhoto(pid), distinction=distinction,description=description)
+
+
+
+@app.route("/search", methods=['GET','POST'])
+@flask_login.login_required
+def search():
+    # if flask_login.current_user.is_authenticated == False:
+    #     uid = getUserIdFromEmail("anonymous@bu.edu")
+    # else:
+    uid = getUserIdFromEmail(flask_login.current_user.id)
+    if request.method=='GET':
+        return render_template('search.html', uid=uid)
+    else:
+        distinction = request.form.get('distinction')
+        contents = request.form.get('content')
+        result=[]
+        if distinction =='0':
+            temp = contents.split(' ')
+            content = [x.lower() for x in temp]
+            photos = []
+            for c in content:
+                photos += tag_resource.getPhotoByTag(content[0]) #pid's
+            photos = list(set(photos)) #remove duplicate photos
+            for photo in photos:
+                pid=int(photo[0])
+                if pid == -1:
+                    continue
+                tags=[] #tags associate with that photo
+                taglist = photo_resource.getPhotoTag(pid) #tag_name
+                for tag in taglist:
+                    tags.append(tag[0])
+                if all(elem in tags for elem in content):
+                    owneruid = photo_resource.findOwnerByPid(pid)
+                    ownername = user_resource.getUsersName(owneruid) #first name
+                    photodata = photo_resource.getPhoto(pid) #pid, caption, img_data
+                    numlikes = photo_resource.getNumLikes(pid)
+                    comment = photo_resource.getPhotoComment(pid) #text, Has_Comments.date, Has_Comments.pid, Users.first_name
+                    tags = photo_resource.getPhotoTag(pid)
+                    aid= album_resource.getAlbumId(pid)
+                    isFriend = user_resource.is_friend(uid, owneruid)
+                    isP = user_resource.is_private(owneruid)
+                    if not isP or isFriend:
+                        result.append([photodata, numlikes, comment, tags, ownername, aid])
+            return render_template('search.html', uid=uid, distinction=distinction, photos=result, content=content)
+        else:
+            # g.conn.execute("SELECT uid, count(cid) as count FROM Has_Comments WHERE text = '{0}' GROUP BY uid ORDER BY count DESC".format(contents))
+            commenters = g.conn.execute("SELECT c.uid, count(c.cid) FROM Has_Comments h,Commented c \
+                WHERE h.text = '{0}' AND h.cid=c.cid GROUP BY c.uid ORDER BY count DESC".format(
+                contents)).fetchall()
+            for commenter in commenters:
+                uname = user_resource.getUsersName(commenter[0])
+                owneruid = commenter[0]
+                isFriend = user_resource.is_friend(uid, owneruid)
+                isP = user_resource.is_private(owneruid)
+                if not isP or isFriend:
+                    result.append([uname,commenter[1]])
+            return render_template('search.html', uid=uid, distinction=distinction, commenters=result)
 
 if __name__ == "__main__":
     import click

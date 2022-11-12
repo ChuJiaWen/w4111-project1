@@ -92,6 +92,7 @@
         <ul>
             {% if message=='Logged out' %}
                 <li><a href='/login'>Login</a></li>
+                <li><a href='/register'>Register</a></li>
             {% else %}
                 <li><a href='/friend'>Add a new friend</a></li>
                 <li><a href='/album'>Go to Albums</a></li>
@@ -104,58 +105,58 @@
         </ul>
     </nav>
 <hr>
-<h3>Here are some most popular photos!</h3>
-    <div id="popluarphotos">
-{% for photo in photos %}
-    <div class="photos">
-    <li><h3 class="caption">Caption: {{photo['caption']}}</h3></li>
-    <li><h3 class="tag" style="display: inline;">Tags:
-                {% for tag in photo['tags'] %}
-                    <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
-                {% endfor %}
-    </h3></li>
-        <br>
-            <img src=' {{ photo['img_data'] }}' style="max-width: 100%; height: auto;"/></li>
-            <h4>Uploaded by: {{ photo['owner_name'] }}</h4>
-            <form method="post" enctype="multipart/form-data" action="/like">
-                <input type="hidden" name="distinction" value=2>
-                <input type="hidden" name="description" value={{ description }}>
-                <input type="hidden" name="aid" value={{ photo['aid'] }}>
-                <input type="hidden" name="pid" value={{ photo['pid'] }}>
-                <input type="submit" value="Like ({{ photo['numlikes'] }})" size="10" />
-            </form>
-            <h3>Comments:</h3>
-            <table border="2" cellpadding="5" width="100%">
-                        <tr>
-                            <td><b> Commenter </b></td>
-                            <td><b> Comment </b></td>
-                            <td><b> Date </b></td>
-                        </tr>
-
-            {% for comment in photo['comments'] %}
-                        <tr>
-                            <td>{{ comment['user_name'] }}</td>
-                            <td>{{ comment['text'] }}</td>
-                            <td>{{ comment['date'] }}</td>
-                        </tr>
-            {% endfor %}
-            </table>
-            <br>
-        {% if uid !=  photo['owner_uid']  %}
-            <form method="post" enctype="multipart/form-data" action="/onetag?description={{ description }}">
-                <input type="hidden" name="pid" value={{ photo['pid'] }}>
-                <label for="comment">Leave your comment:</label>
-                <input type="text" name="comment" size="100" />
-                <input type="submit" value="Send" />
-            </form>
-        {% endif %}
-        </div>
-    <br>
-{% endfor %}
-
-    </div>
-
-</div>
+{#<h3>Here are some most popular photos!</h3>#}
+{#    <div id="popluarphotos">#}
+{#{% for photo in photos %}#}
+{#    <div class="photos">#}
+{#    <li><h3 class="caption">Caption: {{photo['caption']}}</h3></li>#}
+{#    <li><h3 class="tag" style="display: inline;">Tags:#}
+{#                {% for tag in photo['tags'] %}#}
+{#                    <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>#}
+{#                {% endfor %}#}
+{#    </h3></li>#}
+{#        <br>#}
+{#            <img src=' {{ photo['img_data'] }}' style="max-width: 100%; height: auto;"/></li>#}
+{#            <h4>Uploaded by: {{ photo['owner_name'] }}</h4>#}
+{#            <form method="post" enctype="multipart/form-data" action="/like">#}
+{#                <input type="hidden" name="distinction" value=2>#}
+{#                <input type="hidden" name="description" value={{ description }}>#}
+{#                <input type="hidden" name="aid" value={{ photo['aid'] }}>#}
+{#                <input type="hidden" name="pid" value={{ photo['pid'] }}>#}
+{#                <input type="submit" value="Like ({{ photo['numlikes'] }})" size="10" />#}
+{#            </form>#}
+{#            <h3>Comments:</h3>#}
+{#            <table border="2" cellpadding="5" width="100%">#}
+{#                        <tr>#}
+{#                            <td><b> Commenter </b></td>#}
+{#                            <td><b> Comment </b></td>#}
+{#                            <td><b> Date </b></td>#}
+{#                        </tr>#}
+{##}
+{#            {% for comment in photo['comments'] %}#}
+{#                        <tr>#}
+{#                            <td>{{ comment['user_name'] }}</td>#}
+{#                            <td>{{ comment['text'] }}</td>#}
+{#                            <td>{{ comment['date'] }}</td>#}
+{#                        </tr>#}
+{#            {% endfor %}#}
+{#            </table>#}
+{#            <br>#}
+{#        {% if uid !=  photo['owner_uid']  %}#}
+{#            <form method="post" enctype="multipart/form-data" action="/onetag?description={{ description }}">#}
+{#                <input type="hidden" name="pid" value={{ photo['pid'] }}>#}
+{#                <label for="comment">Leave your comment:</label>#}
+{#                <input type="text" name="comment" size="100" />#}
+{#                <input type="submit" value="Send" />#}
+{#            </form>#}
+{#        {% endif %}#}
+{#        </div>#}
+{#    <br>#}
+{#{% endfor %}#}
+{##}
+{#    </div>#}
+{##}
+{#</div>#}
 
 
 <br>
