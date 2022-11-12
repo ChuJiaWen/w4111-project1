@@ -74,7 +74,7 @@
     <h1 style="text-align: center;color:red;">You successfully liked this photo.</h1>
 {% endif %}
 <div class="photos">
-    <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}' style="max-width: 100%; height: auto;"/>
+    <img src={{ photo[2]}} style="max-width: 100%; height: auto;"/>
     <h4>Number of Likes: {{ numlikes }}</h4>
     <h4>Users that liked this photo:</h4>
     <ul>

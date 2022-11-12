@@ -4,7 +4,7 @@ from backend import album_resource, tag_resource
 from datetime import datetime
 
 def getPhoto(pid):
-    result = g.conn.execute("SELECT  pid, caption, img_data FROM Photos WHERE pid = '{0}'".format(pid)).fetchone()
+    result = g.conn.execute("SELECT pid, caption, img_data FROM Photos WHERE pid = '{0}'".format(pid)).fetchone()
     # print("Inside photo_resource/getPhoto(pid), this is info retrived:",result)
     return result
 
@@ -15,7 +15,6 @@ def getPhotoOwner_Album(pid):
 def getPhotoComment(pid):
     result = g.conn.execute("SELECT text, Has_Comments.date, Has_Comments.pid, Users.first_name FROM Has_Comments,Commented, Users \
     WHERE Has_Comments.pid ='{0}' AND Commented.pid = '{0}' AND Has_Comments.cid=Commented.cid AND Users.uid=Commented.uid".format(pid)).fetchall()
-    # print("Inside photo_resource/getPhotoComment(pid), this is comments retrived:", result)
     return result
 
 def getPhotoTag(pid):
@@ -73,3 +72,7 @@ def post_upload_photo(uid, request):
         photolist.append([photo, numlikes, tags])
     return render_template('onealbum.html', aid=aid, name=album_resource.getAlbumName(aid), message='Photo uploaded!',
                            photos=photolist)
+
+def findOwnerByPid(pid):
+    result = g.conn.execute("SELECT a.uid FROM Contains c, Albums a WHERE a.aid=c.aid AND c.pid = '{0}'".format(pid)).fetchone()
+    return result[0]

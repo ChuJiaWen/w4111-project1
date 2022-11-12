@@ -79,3 +79,7 @@ def post_onealbum(uid, request):
     else:
         g.conn.execute("DELETE FROM Photos WHERE pid='{0}'".format(pid))
     return get_onealbum(uid, aid)
+
+def getAlbumId(pid):
+    res = g.conn.execute("SELECT aid FROM Contains WHERE pid ='{0}'".format(pid)).fetchone()
+    return res[0]

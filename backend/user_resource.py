@@ -190,3 +190,4 @@ def getAllPhotos(uid):
         if len(album_data)>0:
             user_photos.append({'owner_id':owner_id, 'owner_name':owner_name, 'albums':album_data})
     return user_photos
+
