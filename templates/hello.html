@@ -5,17 +5,22 @@
     <title>Photoshare</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
     <style>
-        *{box-sizing: border-box;
-            font-family: 'Roboto Mono', monospace;}
-        a{
+        * {
+            box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        a {
             font-size: calc(5px + 0.8vw);
             color: #b75036;
         }
+
         a:hover {
             color: #deb344;
             text-decoration: none;
         }
-        nav li{
+
+        nav li {
             margin: 0.5vh 1.5em;
             padding: 0.5vh 0;
             box-sizing: border-box;
@@ -24,50 +29,61 @@
             display: inline;
             text-align: center;
         }
+
         nav ul {
             padding-inline-start: 0;
             margin-block-start: 0;
-            margin:auto;
+            margin: auto;
             margin: 3vh 1vw;
-            text-align:center;
-		    box-sizing:border-box;
+            text-align: center;
+            box-sizing: border-box;
             border-bottom: solid gray(1) 5px;
         }
+
         nav a {
             color: #5aa7e8;
             font-size: calc(4px + 1vw);
         }
+
         nav a:hover {
             color: #81e0e0;
             text-decoration: none;
         }
-        nav{
+
+        nav {
             border-bottom: solid gray(1) 5px;
 
         }
-        img.photos{
-            width:80%;
+
+        img.photos {
+            width: 80%;
             max-width: 100%;
-            height:auto;
+            height: auto;
             box-sizing: border-box;
         }
-        .photos{
+
+        .photos {
             border: double 6px darkred;
             padding: 2vh 3vw;
-            margin:1vh 0;
+            margin: 1vh 0;
         }
+
         .user {
             border: dashed 8px midnightblue;
             padding: 2vh 3vw;
             margin: 10vh 2vw;
         }
-        .album{
+
+        .album {
             border-top: dotted 6px darkslategrey;
             border-bottom: dotted 6px darkslategrey;
         }
-        h3.caption , h3.tag, h3.album{border-bottom: dashed dimgrey 2px;
+
+        h3.caption, h3.tag, h3.album {
+            border-bottom: dashed dimgrey 2px;
             margin: 0;
         }
+
         h3.caption, h3.photos {
             text-align: center;
         }
@@ -103,7 +119,59 @@
             <li><a href='/'>Home</a></li>
         </ul>
     </nav>
-<hr>
+    <hr>
+    <h3>Here are some most popular photos!</h3>
+    <div id="popluarphotos">
+        {% for photo in photos %}
+            <div class="photos">
+                <li><h3 class="caption">Caption: {{ photo['caption'] }}</h3></li>
+                <li><h3 class="tag" style="display: inline;">Tags:
+                    {% for tag in photo['tags'] %}
+                        <a href="/onetag?description={{ tag[0] }}"> #{{ tag[0] }}</a>
+                    {% endfor %}
+                </h3></li>
+                <br>
+                <img src=' {{ photo['img_data'] }}' style="max-width: 100%; height: auto;"/></li>
+                <h4>Uploaded by: {{ photo['owner_name'] }}</h4>
+                <form method="post" enctype="multipart/form-data" action="/like">
+                    <input type="hidden" name="distinction" value=2>
+                    <input type="hidden" name="description" value={{ description }}>
+                    <input type="hidden" name="aid" value={{ photo['aid'] }}>
+                    <input type="hidden" name="pid" value={{ photo['pid'] }}>
+                    <input type="submit" value="Like ({{ photo['numlikes'] }})" size="10"/>
+                </form>
+                <h3>Comments:</h3>
+                <table border="2" cellpadding="5" width="100%">
+                    <tr>
+                        <td><b> Commenter </b></td>
+                        <td><b> Comment </b></td>
+                        <td><b> Date </b></td>
+                    </tr>
+
+                    {% for comment in photo['comments'] %}
+                        <tr>
+                            <td>{{ comment['user_name'] }}</td>
+                            <td>{{ comment['text'] }}</td>
+                            <td>{{ comment['date'] }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <br>
+                {% if uid !=  photo['owner_uid'] %}
+                    <form method="post" enctype="multipart/form-data" action="/onetag?description={{ description }}">
+                        <input type="hidden" name="pid" value={{ photo['pid'] }}>
+                        <label for="comment">Leave your comment:</label>
+                        <input type="text" name="comment" size="100"/>
+                        <input type="submit" value="Send"/>
+                    </form>
+                {% endif %}
+            </div>
+            <br>
+        {% endfor %}
+
+    </div>
+
+</div>
 
 
 <br>
