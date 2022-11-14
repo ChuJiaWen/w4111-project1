@@ -123,7 +123,7 @@ def searchfriend():
         searchlist = []
         if search:
             for temp in search:
-                if temp[2] != 'anonymous@bu.edu':
+                if temp[2] != 'anonymous@columbia.edu':
                     searchlist.append(temp)
         recommand = user_resource.getRecommandFriend(uid)
         friendlist = user_resource.getUserFriend(uid)
@@ -335,9 +335,6 @@ def create_album():
 @app.route("/onealbum", methods=['GET', 'POST'])
 @flask_login.login_required
 def onealbum():
-    # if flask_login.current_user.is_authenticated == False:
-    #     uid = getUserIdFromEmail("anonymous@bu.edu")
-    # else:
     uid = getUserIdFromEmail(flask_login.current_user.id)
 
     if request.method == 'POST':
@@ -358,9 +355,6 @@ def upload_file():
 @app.route("/browse", methods=['GET','POST'])
 @flask_login.login_required
 def browse():
-    # if flask_login.current_user.is_authenticated == False:
-    #     uid = getUserIdFromEmail("anonymous@columbia.edu")
-    # else:
     uid = getUserIdFromEmail(flask_login.current_user.id)
 
     if request.method=='GET':
@@ -371,9 +365,6 @@ def browse():
 @app.route("/onetag", methods=['GET','POST'])
 @flask_login.login_required
 def onetag():
-    # if flask_login.current_user.is_authenticated == False:
-    #     uid = getUserIdFromEmail("anonymous@bu.edu")
-    # else:
     uid = getUserIdFromEmail(flask_login.current_user.id)
     tag_name = request.args.get('description')
     if request.method =='GET':
@@ -409,9 +400,6 @@ def like():
 @app.route("/search", methods=['GET','POST'])
 @flask_login.login_required
 def search():
-    # if flask_login.current_user.is_authenticated == False:
-    #     uid = getUserIdFromEmail("anonymous@bu.edu")
-    # else:
     uid = getUserIdFromEmail(flask_login.current_user.id)
     if request.method=='GET':
         return render_template('search.html', uid=uid)

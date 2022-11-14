@@ -15,7 +15,8 @@ def get_login_page():
                 <input type='password' name='password' id='password' placeholder='password'></input>
                 <input type='submit' name='submit'></input>
                </form></br>
-           <a href='/'>Home</a>
+           <a href='/'>Home</a> <br>
+           <a href='/register'> Register </a>
                '''
 
 def post_login_page(email,password):
