@@ -220,7 +220,8 @@ def index():
     # You can see an example template in templates/index.html
     #
     if flask_login.current_user.is_authenticated == False:
-        return render_template('register.html', supress=True)
+        photolist = general_resource.getPoplarPhotoInfo()
+        return render_template('hello.html', supress=True, photos=photolist)
     else:
         uid = getUserIdFromEmail(flask_login.current_user.id)
 
