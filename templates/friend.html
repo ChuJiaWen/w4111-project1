@@ -103,7 +103,7 @@
 <hr>
 <div class="searchfriend">
     <h1>Search a friend</h1>
-    <h4>You don't have to enter every row.</h4>
+    <h4>You don't have to enter every row.(Lowercase/Uppercase affects the result!)</h4>
     <form method="post" enctype="multipart/form-data" action="/friend">
         <label for="first_name">First name:</label>
         <input type="text" name="first_name" /><br />
@@ -176,7 +176,7 @@
     {% endfor %}
     </table>
 {% else %}
-    <h2>There aren't any recommended users for you.</h2>
+    <h2>There aren't any recommended users for you. Please try to expand your network~</h2>
 {% endif %}
 </div>
 
