@@ -35,8 +35,7 @@ def post_login_page(email,password):
             return redirect(url_for('protected'))  # protected is a function defined in this file
 
     # information did not match
-    print("Email not found or password not correct")
-    return "<a href='/login'>Try again</a>\
+    return "<a href='/login'>Email not found or password not correct</a>\
                     </br><a href='/register'>or make an account</a>"
 
 def isEmailUnique(email):
@@ -78,7 +77,7 @@ def register_account(form_data):
 
 def getUserIdFromEmail(email):
     result = g.conn.execute("SELECT uid  FROM Users WHERE email = '{0}'".format(email)).fetchone()
-    print("Getting uid:",result, result[0])
+    # print("Getting uid:",result, result[0])
     return result[0]
 
 def getUsersName(uid):
@@ -138,8 +137,8 @@ def is_private(uid):
     return g.conn.execute("SELECT is_private FROM Users WHERE uid = '{0}'".format(uid)).fetchone()[0]
 
 def is_friend(uid,fuid):
-    result = g.conn.execute("SELECT COUNT(*)  FROM Is_Friend WHERE uid = '{0}' AND fuid = '{1}'".format(uid,fuid)).fetchone()
-    if len(result) != 0:
+    result = g.conn.execute("SELECT COUNT(*)  FROM Is_Friend WHERE uid = '{0}' AND fuid = '{1}'".format(uid,fuid)).fetchone()[0]
+    if result != 0:
         return True
     else:
         return False
@@ -156,7 +155,7 @@ def getAllPhotos(uid):
             users.append([owner_id,getUsersName(owner_id)])
         elif is_private(owner_id) and is_friend(uid,owner_id): #if account is private and user is account's friend
             users.append([owner_id, getUsersName(owner_id)])
-    # print("This is users inside user_resource/getAllPhotos:", users)
+    # print("This is users list to get photos in browse inside user_resource/getAllPhotos:", users)
     """
     user1 = '{  'owner_id' : owner_id,
                 "owner_name": owner_name,
