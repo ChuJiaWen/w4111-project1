@@ -228,14 +228,6 @@ def index():
         photolist = general_resource.getPoplarPhotoInfo()
         return render_template("hello.html", name=user_resource.getUsersName(uid), message="Here's your profile", photos=photolist)
 
-#
-# This is an example of a different path.  You can see it at:
-#
-#     localhost:8111/another
-#
-# Notice that the function name is another() rather than index()
-# The functions for each app.route need to have different names
-#
 
 def getUserList():
     users = g.conn.execute("SELECT email from Users").fetchall()
@@ -283,8 +275,8 @@ def request_loader(request):
 @flask_login.login_required
 def protected():
     uid = getUserIdFromEmail(flask_login.current_user.id)
-    print("uid is:", uid)
-    return render_template('hello.html', name=user_resource.getUsersName(uid), message="Here's your profile")
+    photolist = general_resource.getPoplarPhotoInfo()
+    return render_template('hello.html', name=user_resource.getUsersName(uid), message="Here's your profile", photos=photolist)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -301,7 +293,8 @@ def login():
 @app.route('/logout')
 def logout():
     flask_login.logout_user()
-    return render_template('hello.html', message='Logged out')
+    photolist = general_resource.getPoplarPhotoInfo()
+    return render_template('hello.html', message='Logged out',photos=photolist)
 
 
 @login_manager.unauthorized_handler
