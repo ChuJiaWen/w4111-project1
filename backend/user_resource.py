@@ -65,8 +65,7 @@ def register_account(form_data):
         print("couldn't find all tokens") #this prints to shell, end users will not see this (all print statements go to shell)
         return redirect(url_for('register'))
     cursor = g.conn
-    test =  isEmailUnique(email)
-    if test:
+    if isEmailUnique(email):
         print(cursor.execute("INSERT INTO Users (email, password,first_name,last_name,hometown,gender, DOB,is_private) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}','{6}',{7})".format(email, password,first_name,last_name,hometown,gender, DOB,is_private)))
         # conn.commit()
         #log user in

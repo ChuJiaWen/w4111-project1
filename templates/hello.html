@@ -120,6 +120,7 @@
         </ul>
     </nav>
     <hr>
+{% if photos %}
     <h3>Here are some most popular photos!</h3>
     <div id="popluarphotos">
         {% for photo in photos %}
@@ -170,6 +171,7 @@
         {% endfor %}
 
     </div>
+{% endif %}
 
 </div>
 

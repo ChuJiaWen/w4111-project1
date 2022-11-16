@@ -1,3 +1,5 @@
+import string
+
 from flask import render_template, g, redirect
 import mimetypes, urllib
 
@@ -56,16 +58,15 @@ def post_upload_photo(uid, request):
         return render_template('upload.html', aid=aid, albumname=aname,tags=tags, message="The URL you entered does not return an image. Please try another one.")
     else:
         caption = request.form.get('caption')
-        newtag = request.form.get('newtag')
-        newtag = newtag.lower()
+        choosedtags = request.form.getlist('choosetag')
+        date = datetime.today().strftime('%Y-%m-%d')
+        newtag = request.form.get('newtag').lower()
         if newtag:
             if newtag[len(newtag) - 1] == ";":
                 newtag = newtag[:-1]
         newtags = newtag.split(";")
         # print("after split, New tags look like these:", newtag)
         # newtags = list(dict.fromkeys(newtags))
-        choosedtags = request.form.getlist('choosetag')
-        date = datetime.today().strftime('%Y-%m-%d')
         g.conn.execute('''INSERT INTO Photos (img_data,caption) VALUES (%s, %s )''',
                        (img_data, caption))
         pid = g.conn.execute("SELECT pid FROM Photos ORDER BY pid DESC LIMIT 1;").fetchone()[0]
@@ -75,6 +76,7 @@ def post_upload_photo(uid, request):
 
         if newtags != [''] and newtags != [""] and newtags != None and newtags != []:
             for tag in newtags:
+                tag =tag.translate({ord(c):None for c in string.whitespace})#remove whitespaces
                 choosedtags.append(tag)
                 g.conn.execute('''INSERT INTO Tags (tag_name) VALUES (%s)''', (tag))
         choosedtags = list(dict.fromkeys(choosedtags))
