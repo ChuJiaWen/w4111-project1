@@ -115,7 +115,7 @@
                 <form method="post" enctype="multipart/form-data" action="/like">
                     <input type="hidden" name="description" value={{ description }}>
                     <input type="hidden" name="aid" value={{ photo[5] }}>
-                    <input type="hidden" name="pid" value={{ photo[0][1] }}>
+                    <input type="hidden" name="pid" value={{ photo[0][0] }}>
                     <input type="submit" value="Like ({{ photo[1] }})" size="10"/>
                 </form>
                 <h3>Comments:</h3>
