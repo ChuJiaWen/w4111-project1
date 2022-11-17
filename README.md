@@ -2,7 +2,7 @@
 PostgreSQL account: xg2399
 
 ## The URL of our web application:
-[http://34.66.160.106:8111/](http://34.66.160.106:8111/)
+[http://34.172.178.48:8111/](http://34.172.178.48:8111/)
 
 ## Features:
 1. Parts of the original proposal in Part 1 that have been implemented: 
