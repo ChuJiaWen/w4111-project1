@@ -90,8 +90,12 @@
         <li><a href='/onealbum?aid={{ aid }}'>Back to Album "{{ albumname }}"</a></li>
     {% elif distinction == '2' %}
          <li><a href='/onetag?description={{ description }}'>Back to tag "{{ description }}"</a></li>
+    {% elif distinction == '3' %}
+        <p></p>
     {% elif distinction == '0' %}
-         <li><a href='/browse'>Back to browse"</a></li>
+         <li><a href='/browse'>Back to browse</a></li>
+    {% elif distinction == '4' %}
+         <li><a href='/search'>Back to search</a></li>
     {% endif %}
     <li><a href='/'>Home</a></li>
 </ul>
