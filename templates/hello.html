@@ -135,7 +135,7 @@
                 <img src=' {{ photo['img_data'] }}' style="max-width: 100%; height: auto;"/></li>
                 <h4>Uploaded by: {{ photo['owner_name'] }}</h4>
                 <form method="post" enctype="multipart/form-data" action="/like">
-                    <input type="hidden" name="distinction" value=2>
+                    <input type="hidden" name="distinction" value=3>
                     <input type="hidden" name="description" value={{ description }}>
                     <input type="hidden" name="aid" value={{ photo['aid'] }}>
                     <input type="hidden" name="pid" value={{ photo['pid'] }}>
